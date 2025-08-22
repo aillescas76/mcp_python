@@ -3,21 +3,32 @@
 from typing import Any, Dict, List
 
 from ..analysis.symbols import Symbol
-from ..index.project import ProjectIndex
+from .tool import Tool, ToolContext
 
 
-async def document_symbols_tool(index: ProjectIndex, uri: str) -> List[Dict[str, Any]]:
-    """Handles a document symbols request.
+class DocumentSymbolsTool(Tool):
+    """A tool that provides a document symbol outline for a given file."""
 
-    This tool retrieves the hierarchical symbol outline for a given document URI.
-    It relies on the project index to get the symbols for the file.
+    @property
+    def name(self) -> str:
+        return "document_symbols"
 
-    Args:
-        index: The project index.
-        uri: The URI of the document to analyze.
+    @property
+    def description(self) -> str:
+        return "Provides a document symbol outline for a given file."
 
-    Returns:
-        A list of Symbol objects, serialized as dictionaries.
-    """
-    symbols: List[Symbol] = index.symbols.get(uri, [])
-    return [symbol.to_dict() for symbol in symbols]
+    @property
+    def schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "uri": {"type": "string", "description": "The URI of the document to analyze."}
+            },
+            "required": ["uri"],
+        }
+
+    async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
+        """Handles a document symbols request."""
+        uri = kwargs["uri"]
+        symbols: List[Symbol] = context.project_index.symbols.get(uri, [])
+        return [symbol.to_dict() for symbol in symbols]

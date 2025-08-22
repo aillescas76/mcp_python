@@ -1,9 +1,10 @@
-from typing import Dict, Any, List
 import ast
-from pathlib import Path
 import astunparse
+from pathlib import Path
+from typing import Any, Dict
 
-from ..index.project import ProjectIndex
+from .tool import Tool, ToolContext
+
 
 class RenameTransformer(ast.NodeTransformer):
     def __init__(self, old_name: str, new_name: str):
@@ -33,31 +34,54 @@ class RenameTransformer(ast.NodeTransformer):
         self.generic_visit(node)
         return node
 
-async def rename_symbol_tool(
-    index: ProjectIndex, file_path: str, old_name: str, new_name: str, apply: bool = False
-) -> Dict[str, Any]:
-    """
-    Renames a symbol in a single file.
-    """
-    if not old_name or not new_name:
-        return {"error": "Old symbol name and new name cannot be empty."}
 
-    path = Path(file_path)
-    if not path.is_file():
-        return {"error": f"File not found: {file_path}"}
+class RenameSymbolTool(Tool):
+    @property
+    def name(self) -> str:
+        return "rename_symbol"
 
-    original_content = path.read_text()
-    tree = ast.parse(original_content)
+    @property
+    def description(self) -> str:
+        return "Renames a symbol and all its references across the project."
 
-    transformer = RenameTransformer(old_name, new_name)
-    new_tree = transformer.visit(tree)
-    ast.fix_missing_locations(new_tree)
+    @property
+    def schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "file_path": {"type": "string"},
+                "old_name": {"type": "string"},
+                "new_name": {"type": "string"},
+                "apply": {"type": "boolean", "default": False},
+            },
+            "required": ["file_path", "old_name", "new_name"],
+        }
 
-    modified_content = astunparse.unparse(new_tree)
+    async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, Any]:
+        file_path = kwargs["file_path"]
+        old_name = kwargs["old_name"]
+        new_name = kwargs["new_name"]
+        apply = kwargs.get("apply", False)
 
-    if apply:
-        path.write_text(modified_content)
-        index.file_cache.invalidate(path)
-        return {"status": "ok"}
-    else:
-        return {"modified_content": modified_content}
+        if not old_name or not new_name:
+            return {"error": "Old symbol name and new name cannot be empty."}
+
+        path = Path(file_path)
+        if not path.is_file():
+            return {"error": f"File not found: {file_path}"}
+
+        original_content = path.read_text()
+        tree = ast.parse(original_content)
+
+        transformer = RenameTransformer(old_name, new_name)
+        new_tree = transformer.visit(tree)
+        ast.fix_missing_locations(new_tree)
+
+        modified_content = astunparse.unparse(new_tree)
+
+        if apply:
+            path.write_text(modified_content)
+            context.project_index.file_cache.invalidate(path)
+            return {"status": "ok"}
+        else:
+            return {"modified_content": modified_content}

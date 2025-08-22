@@ -3,8 +3,8 @@
 import ast
 from typing import Any, Dict, List
 
-from ..index.project import ProjectIndex
 from .find_definition import Location
+from .tool import Tool, ToolContext
 
 
 class ReferenceVisitor(ast.NodeVisitor):
@@ -23,31 +23,44 @@ class ReferenceVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-async def find_references_tool(
-    index: ProjectIndex, symbol: str
-) -> List[Dict[str, Any]]:
-    """Handles a find references request for a given symbol.
+class FindReferencesTool(Tool):
+    """A tool that finds all references to a symbol."""
 
-    This version performs a simple AST traversal to find all references by name.
+    @property
+    def name(self) -> str:
+        return "find_references"
 
-    Args:
-        index: The project index.
-        symbol: The symbol name to find references for.
+    @property
+    def description(self) -> str:
+        return "Finds all references to a symbol."
 
-    Returns:
-        A list of Locations where the symbol name appears.
-    """
-    locations: List[Location] = []
-    all_uris = index.get_all_uris()
-    for file_uri in all_uris:
-        file_module = index.modules.get(file_uri)
-        if not file_module:
-            continue
+    @property
+    def schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "symbol": {
+                    "type": "string",
+                    "description": "The symbol to find references for.",
+                }
+            },
+            "required": ["symbol"],
+        }
 
-        visitor = ReferenceVisitor(symbol)
-        visitor.visit(file_module.tree)
-        for ref_node in visitor.references:
-            if hasattr(ref_node, "_range"):
-                locations.append(Location(uri=file_uri, range=ref_node._range))
+    async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
+        """Handles a find references request for a given symbol."""
+        symbol = kwargs["symbol"]
+        locations: List[Location] = []
+        all_uris = context.project_index.get_all_uris()
+        for file_uri in all_uris:
+            file_module = context.project_index.modules.get(file_uri)
+            if not file_module:
+                continue
 
-    return [loc.to_dict() for loc in locations]
+            visitor = ReferenceVisitor(symbol)
+            visitor.visit(file_module.tree)
+            for ref_node in visitor.references:
+                if hasattr(ref_node, "_range"):
+                    locations.append(Location(uri=file_uri, range=ref_node._range))
+
+        return [loc.to_dict() for loc in locations]

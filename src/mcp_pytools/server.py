@@ -1,122 +1,71 @@
-import asyncio
 from pathlib import Path
-from typing import List, Dict, Any, Optional
-
+from typing import Any, Dict
 from mcp.server.fastmcp import FastMCP
+from functools import partial
 
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.document_symbols import document_symbols_tool
-from mcp_pytools.tools.find_definition import find_definition_tool
-from mcp_pytools.tools.find_references import find_references_tool
-from mcp_pytools.tools.import_graph import import_graph_tool
-from mcp_pytools.tools.search_text import search_text_tool
-from mcp_pytools.tools.docstring_lints import docstring_lints_tool
-from mcp_pytools.tools.mutability_check import mutability_check_tool
-from mcp_pytools.tools.syntax_check import syntax_check_tool
-from mcp_pytools.tools.organize_imports import organize_imports_tool
+from mcp_pytools.tools import tool_registry
+from mcp_pytools.tools.tool import ToolContext
 
 mcp = FastMCP("Python Code Tools")
 
-# This is a global index. For a real server, this would need better management.
-# The server should be initialized with a project root.
 PROJECT_ROOT = Path("/home/aic/code/mcp_python")
-project_index = ProjectIndex(PROJECT_ROOT)
 
+class ServerContext(ToolContext):
+    def __init__(self, project_root: Path):
+        self._project_root = project_root
+        self._project_index = ProjectIndex(project_root)
 
-@mcp.tool()
-async def document_symbols(uri: str) -> List[Dict[str, Any]]:
-    """
-    Provides a document symbol outline for a given file.
-    """
-    return await document_symbols_tool(project_index, uri)
+    @property
+    def project_index(self) -> ProjectIndex:
+        return self._project_index
 
+    def build_index(self):
+        print("Building project index...")
+        self._project_index.build()
+        print(f"Index built. {len(self._project_index.modules)} modules indexed.")
 
-@mcp.tool()
-async def find_definition(symbol: str) -> List[Dict[str, Any]]:
-    """
-    Finds the definition of a symbol.
-    """
-    return await find_definition_tool(project_index, symbol)
-
-
-@mcp.tool()
-async def find_references(symbol: str) -> List[Dict[str, Any]]:
-    """
-    Finds all references to a symbol.
-    """
-    return await find_references_tool(project_index, symbol)
-
-
-@mcp.tool()
-async def import_graph(moduleUri: str) -> Dict[str, List[str]]:
-    """
-    Shows a module's direct imports and its dependents (reverse imports).
-    """
-    return await import_graph_tool(project_index, moduleUri)
-
-
-@mcp.tool()
-async def search_text(
-    pattern: str,
-    includeGlobs: Optional[List[str]] = None,
-    excludeGlobs: Optional[List[str]] = None,
-) -> List[Dict[str, Any]]:
-    """
-    Performs a regular expression search over the files in the project.
-    """
-    return await search_text_tool(project_index, pattern, includeGlobs, excludeGlobs)
-
-
-@mcp.tool()
-async def docstring_lints(uri: str, ignore_private: bool = False) -> List[Dict[str, Any]]:
-    """
-    Checks for missing docstrings in a Python module.
-    """
-    return await docstring_lints_tool(project_index, uri, ignore_private)
-
-
-@mcp.tool()
-async def mutability_check(uri: str) -> List[Dict[str, Any]]:
-    """
-    Checks for mutable default arguments in a Python module.
-    """
-    return await mutability_check_tool(project_index, uri)
-
-
-@mcp.tool()
-async def syntax_check(uri: str) -> List[Dict[str, Any]]:
-    """
-    Checks for syntax errors in a Python module.
-    """
-    return await syntax_check_tool(project_index, uri)
-
-
-@mcp.tool()
-async def organize_imports(uri: str, apply: bool = False) -> Dict[str, Any]:
-    """
-    Organizes imports in a Python module using ruff.
-    """
-    return await organize_imports_tool(project_index, uri, apply)
-
-
-@mcp.tool()
-async def rename_symbol(symbol: str, new_name: str, apply: bool = False) -> Dict[str, Any]:
-    """
-    Renames a symbol and all its references across the project.
-    """
-    return await rename_symbol_tool(project_index, symbol, new_name, apply)
-
+def create_tool_handler(tool, context: ServerContext):
+    async def handler(**kwargs):
+        try:
+            return await tool.handle(context, **kwargs)
+        except Exception as e:
+            return {
+                "error": {
+                    "code": -32000,
+                    "message": f"Tool execution failed: {e}",
+                    "data": str(e),
+                }
+            }
+    return handler
 
 def main():
     """
     Main entry point for the MCP server.
     """
-    print("Building project index...")
-    project_index.build()
-    print(f"Index built. {len(project_index.modules)} modules indexed.")
+    context = ServerContext(PROJECT_ROOT)
+    context.build_index()
+
+    for tool in tool_registry:
+        handler = create_tool_handler(tool, context)
+        # Manually create a signature for the tool
+        # This is a bit of a hack, but it's the easiest way to make it work with FastMCP
+        # which relies on function signatures to generate the tool schema.
+        from inspect import Parameter, Signature
+        params = [
+            Parameter(name, Parameter.POSITIONAL_OR_KEYWORD, annotation=p.get("type", Any))
+            for name, p in tool.schema.get("properties", {}).items()
+        ]
+        sig = Signature(params)
+
+        handler.__signature__ = sig
+        handler.__name__ = tool.name
+        handler.__doc__ = tool.description
+
+        mcp.tool()(handler)
+
     print("MCP Python Tools Server starting...")
     mcp.run()
-
 
 if __name__ == "__main__":
     main()
