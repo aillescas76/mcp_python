@@ -10,6 +10,10 @@ from mcp_pytools.tools.find_definition import find_definition_tool
 from mcp_pytools.tools.find_references import find_references_tool
 from mcp_pytools.tools.import_graph import import_graph_tool
 from mcp_pytools.tools.search_text import search_text_tool
+from mcp_pytools.tools.docstring_lints import docstring_lints_tool
+from mcp_pytools.tools.mutability_check import mutability_check_tool
+from mcp_pytools.tools.syntax_check import syntax_check_tool
+from mcp_pytools.tools.organize_imports import organize_imports_tool
 
 mcp = FastMCP("Python Code Tools")
 
@@ -61,6 +65,46 @@ async def search_text(
     Performs a regular expression search over the files in the project.
     """
     return await search_text_tool(project_index, pattern, includeGlobs, excludeGlobs)
+
+
+@mcp.tool()
+async def docstring_lints(uri: str, ignore_private: bool = False) -> List[Dict[str, Any]]:
+    """
+    Checks for missing docstrings in a Python module.
+    """
+    return await docstring_lints_tool(project_index, uri, ignore_private)
+
+
+@mcp.tool()
+async def mutability_check(uri: str) -> List[Dict[str, Any]]:
+    """
+    Checks for mutable default arguments in a Python module.
+    """
+    return await mutability_check_tool(project_index, uri)
+
+
+@mcp.tool()
+async def syntax_check(uri: str) -> List[Dict[str, Any]]:
+    """
+    Checks for syntax errors in a Python module.
+    """
+    return await syntax_check_tool(project_index, uri)
+
+
+@mcp.tool()
+async def organize_imports(uri: str, apply: bool = False) -> Dict[str, Any]:
+    """
+    Organizes imports in a Python module using ruff.
+    """
+    return await organize_imports_tool(project_index, uri, apply)
+
+
+@mcp.tool()
+async def rename_symbol(symbol: str, new_name: str, apply: bool = False) -> Dict[str, Any]:
+    """
+    Renames a symbol and all its references across the project.
+    """
+    return await rename_symbol_tool(project_index, symbol, new_name, apply)
 
 
 def main():

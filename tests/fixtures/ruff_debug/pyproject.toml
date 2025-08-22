@@ -30,7 +30,6 @@ dev = [
     "pytest",
     "ruff",
     "ipdb",
-    "astunparse",
 ]
 
 [tool.setuptools.packages.find]
@@ -49,6 +48,3 @@ select = [
 
 [tool.ruff.format]
 quote-style = "double"
-
-[tool.scripts]
-test = "pytest"
