@@ -18,8 +18,8 @@ MCP addresses this by establishing a universal, open standard for communication.
 
 The MCP architecture is a client-server model inspired by the design of the highly successful Language Server Protocol (LSP), which standardized communication between code editors and language-specific analysis tools.6 This architecture is composed of three distinct participants, each with a clearly defined role.9
 
-* **MCP Host:** The Host is the primary, user-facing AI application, such as an IDE like VS Code, a desktop assistant like Claude Desktop, or a custom agentic framework.7 The Host is responsible for the overall user experience, managing security policies, and coordinating one or more MCP clients.9 It aggregates context from various sources and integrates it into the LLM's workflow.  
-* **MCP Client:** A Client is a component that lives within the Host application. Its sole responsibility is to manage a dedicated, stateful, 1:to:1 connection with a single MCP server.7 The Client handles the low-level details of the protocol, including capability negotiation, message formatting based on JSON-RPC 2.0, and session management.6  
+* **MCP Host:** The Host is the primary, user-facing AI application, such as an IDE like VS Code, a desktop assistant like Claude Desktop, or a custom agentic framework.7 The Host is responsible for the overall user experience, managing security policies, and coordinating one or more MCP clients.9 It aggregates context from various sources and integrates it into the LLM's workflow.
+* **MCP Client:** A Client is a component that lives within the Host application. Its sole responsibility is to manage a dedicated, stateful, 1:to:1 connection with a single MCP server.7 The Client handles the low-level details of the protocol, including capability negotiation, message formatting based on JSON-RPC 2.0, and session management.6
 * **MCP Server:** A Server is an independent program that exposes a specific set of capabilities to the AI ecosystem.7 A server might provide tools for interacting with a GitHub repository, resources for reading from a PostgreSQL database, or prompts for managing a user's calendar.12 Servers can be run locally on the same machine as the Host or remotely over a network.9
 
 This tripartite structure creates a powerful separation of concerns. Server developers can focus exclusively on exposing their domain-specific functionality without needing to understand the complexities of different AI models or host applications. Conversely, host application developers can integrate a vast array of tools and data sources by simply connecting to their standardized MCP interfaces.
@@ -28,9 +28,9 @@ This tripartite structure creates a powerful separation of concerns. Server deve
 
 The architecture of MCP is not accidental; it is guided by a set of deliberate design principles that aim to foster a healthy, scalable, and secure ecosystem.11
 
-1. **Simplicity of Server Creation:** The protocol is explicitly designed to make building servers as easy as possible. The most complex responsibilities, such as user interface management, multi-server orchestration, and security consent flows, are deliberately offloaded to the Host application. This lowers the barrier to entry for developers and organizations wanting to make their services available to AI agents.  
-2. **Composability:** Each MCP server is designed to be a focused, self-contained unit of functionality. A server for interacting with Slack should only handle Slack-related tasks. This modularity allows Host applications to compose complex behaviors by connecting to multiple specialized servers simultaneously, creating a powerful "sum of the parts" effect.  
-3. **Security through Isolation:** A cornerstone of the MCP security model is that servers are isolated from one another. A server connected to a Host cannot "see into" the communications of another server, nor can it access the full conversation history between the user and the LLM. It only receives the specific information required to execute its task, ensuring strong security and privacy boundaries.  
+1. **Simplicity of Server Creation:** The protocol is explicitly designed to make building servers as easy as possible. The most complex responsibilities, such as user interface management, multi-server orchestration, and security consent flows, are deliberately offloaded to the Host application. This lowers the barrier to entry for developers and organizations wanting to make their services available to AI agents.
+2. **Composability:** Each MCP server is designed to be a focused, self-contained unit of functionality. A server for interacting with Slack should only handle Slack-related tasks. This modularity allows Host applications to compose complex behaviors by connecting to multiple specialized servers simultaneously, creating a powerful "sum of the parts" effect.
+3. **Security through Isolation:** A cornerstone of the MCP security model is that servers are isolated from one another. A server connected to a Host cannot "see into" the communications of another server, nor can it access the full conversation history between the user and the LLM. It only receives the specific information required to execute its task, ensuring strong security and privacy boundaries.
 4. **Progressive Feature Discovery:** MCP is a stateful protocol that begins every session with a handshake for capability negotiation.9 The client and server declare which features of the protocol they support. This allows the protocol to evolve over time, adding new capabilities without breaking backward compatibility for older clients and servers.
 
 The principle of simplifying server creation is particularly noteworthy as it represents a strategic choice to accelerate the growth of the MCP ecosystem. By minimizing the implementation burden on the creators of tools and data sources, the protocol's maintainers have engineered for network effects. The easier it is to build a server, the more servers will be created, which in turn increases the value of the ecosystem for all participants. This design philosophy is directly reflected in the ergonomic, high-level frameworks provided by the official SDKs, such as the FastMCP framework in Python, which makes server creation as simple as decorating a standard function.
@@ -85,22 +85,22 @@ The official documentation and community best practices strongly advocate for th
 
 The setup process involves a few simple steps:
 
-1. **Install uv:** If not already installed, uv can be installed on macOS, Linux, or Windows by following the instructions on its official website.  
-2. **Initialize the Project:** Create a new directory for the MCP server and initialize a uv-managed project within it. This command creates a pyproject.toml file to manage project metadata and dependencies.  
-   Bash  
-   mkdir my-mcp-server  
-   cd my-mcp-server  
-   uv init
+1. **Install uv:** If not already installed, uv can be installed on macOS, Linux, or Windows by following the instructions on its official website.
+2. **Initialize the Project:** Create a new directory for the MCP server and initialize a uv-managed project within it. This command creates a pyproject.toml file to manage project metadata and dependencies. 
+ Bash 
+ mkdir ~/code/mcp_python/
+ cd ~/code/mcp_python/
+ uv init
 
-3. **Create and Activate a Virtual Environment:** It is essential to work within a virtual environment to isolate project dependencies. uv simplifies this process.  
-   Bash  
-   uv venv  
-   source.venv/bin/activate  \# On macOS/Linux  
-   \#.venv\\Scripts\\activate   \# On Windows
+3. **Create and Activate a Virtual Environment:** It is essential to work within a virtual environment to isolate project dependencies. uv simplifies this process.
+ Bash 
+ uv venv 
+ source.venv/bin/activate\# On macOS/Linux
+ \#.venv\\Scripts\\activate \# On Windows
 
-4. **Install the MCP Python SDK:** The core package is mcp. It is highly recommended to install the \[cli\] extra, which includes valuable development utilities such as the MCP Inspector.18  
-   Bash  
-   uv add "mcp\[cli\]"
+4. **Install the MCP Python SDK:** The core package is mcp. It is highly recommended to install the \[cli\] extra, which includes valuable development utilities such as the MCP Inspector.18
+ Bash
+ uv add "mcp\[cli\]"
 
 With the environment prepared, development of the MCP server can begin.
 
@@ -118,34 +118,34 @@ Create a file named server.py:
 
 Python
 
-\# server.py  
+\# server.py
 from mcp.server.fastmcp import FastMCP
 
-\# 1\. Create an MCP server instance with a name  
+\# 1\. Create an MCP server instance with a name
 mcp \= FastMCP("Demo")
 
-\# 2\. Add an addition tool using the @mcp.tool() decorator  
-@mcp.tool()  
-def add(a: int, b: int) \-\> int:  
-    """Add two numbers"""  
-    return a \+ b
+\# 2\. Add an addition tool using the @mcp.tool() decorator
+@mcp.tool()
+def add(a: int, b: int) \-\> int:
+"""Add two numbers"""
+return a \+ b
 
-\# 3\. Add a dynamic greeting resource using the @mcp.resource() decorator  
-@mcp.resource("greeting://{name}")  
-def get\_greeting(name: str) \-\> str:  
-    """Get a personalized greeting"""  
-    return f"Hello, {name}\!"
+\# 3\. Add a dynamic greeting resource using the @mcp.resource() decorator
+@mcp.resource("greeting://{name}")
+def get\_greeting(name: str) \-\> str:
+"""Get a personalized greeting"""
+return f"Hello, {name}\!"
 
-\# 4\. Add a main execution block to run the server  
-if \_\_name\_\_ \== "\_\_main\_\_":  
-    mcp.run()
+\# 4\. Add a main execution block to run the server
+if \_\_name\_\_ \== "\_\_main\_\_":
+mcp.run()
 
 This concise script is a fully functional MCP server. A detailed analysis reveals the sophisticated mechanisms at play within the FastMCP framework:
 
-* **mcp \= FastMCP("Demo")**: This line instantiates the central server object. The name "Demo" is a human-readable identifier that will be displayed in Host applications.  
-* **@mcp.tool() and @mcp.resource(...)**: These decorators are the core of the FastMCP API. They register the decorated functions with the mcp instance, transforming them into MCP primitives.  
-* **Type Hints (a: int, b: int, \-\> int)**: The use of Python type hints is not merely for code clarity. FastMCP performs introspection on the function's signature, using these annotations to automatically generate a compliant JSON Schema for the tool's inputs (inputSchema).20 This eliminates the need for developers to manually write complex schema definitions.  
-* **Docstrings ("""Add two numbers""")**: Similarly, the function's docstring is automatically extracted and used as the description field for the tool.20 This description is critical, as it is the primary text the LLM uses to understand what the tool does and when it should be used.  
+* **mcp \= FastMCP("Demo")**: This line instantiates the central server object. The name "Demo" is a human-readable identifier that will be displayed in Host applications.
+* **@mcp.tool() and @mcp.resource(...)**: These decorators are the core of the FastMCP API. They register the decorated functions with the mcp instance, transforming them into MCP primitives.
+* **Type Hints (a: int, b: int, \-\> int)**: The use of Python type hints is not merely for code clarity. FastMCP performs introspection on the function's signature, using these annotations to automatically generate a compliant JSON Schema for the tool's inputs (inputSchema).20 This eliminates the need for developers to manually write complex schema definitions.
+* **Docstrings ("""Add two numbers""")**: Similarly, the function's docstring is automatically extracted and used as the description field for the tool.20 This description is critical, as it is the primary text the LLM uses to understand what the tool does and when it should be used.
 * **if \_\_name\_\_ \== "\_\_main\_\_": mcp.run()**: This standard Python construct serves as the entry point for the server. The mcp.run() method starts the server and begins listening for client connections using the default stdio transport protocol, which is suitable for local execution.24
 
 The elegance of this approach lies in its use of Python's metaprogramming capabilities. The @mcp.tool decorator acts as a higher-order function that, at the moment the add function is defined, inspects its metadata—its name (\_\_name\_\_), documentation (\_\_doc\_\_), and type annotations (\_\_annotations\_\_). It uses this introspected information to construct a complete, protocol-compliant tool definition dictionary behind the scenes and registers it with the server. When mcp.run() is executed, the framework manages the entire lifecycle of communication: it reads JSON-RPC messages from the transport, parses requests, matches them to the registered Python functions, validates incoming parameters against the auto-generated schemas, executes the Python code, and formats the return value into a valid JSON-RPC response. The developer writes idiomatic Python; the framework handles the protocol. This powerful abstraction makes Pythonic conventions like type hints and docstrings not just best practices, but functional requirements for a well-defined FastMCP server.
@@ -166,33 +166,33 @@ Create a file named sqlite\_server.py:
 
 Python
 
-\# sqlite\_server.py  
-from mcp.server.fastmcp import FastMCP  
+\# sqlite\_server.py
+from mcp.server.fastmcp import FastMCP
 import sqlite3
 
-\# Initialize the MCP server with a descriptive name  
+\# Initialize the MCP server with a descriptive name
 mcp \= FastMCP("Community Chatters")
 
-\# Define a tool to fetch data from the SQLite database  
-@mcp.tool()  
-def get\_top\_chatters() \-\> list\[dict\]:  
-    """Retrieve the top chatters sorted by number of messages."""  
-    \# Connect to the local SQLite database file  
-    conn \= sqlite3.connect('community.db')  
-    cursor \= conn.cursor()  
-      
-    \# Execute the SQL query  
-    cursor.execute("SELECT name, messages FROM chatters ORDER BY messages DESC")  
-    results \= cursor.fetchall()  
-    conn.close()  
-      
-    \# Format the results into a structured list of dictionaries  
-    chatters \= \[{"name": name, "messages": messages} for name, messages in results\]  
-    return chatters
+\# Define a tool to fetch data from the SQLite database
+@mcp.tool()
+def get\_top\_chatters() \-\> list\[dict\]:
+"""Retrieve the top chatters sorted by number of messages."""
+\# Connect to the local SQLite database file
+conn \= sqlite3.connect('community.db')
+cursor \= conn.cursor()
 
-\# Run the MCP server  
-if \_\_name\_\_ \== '\_\_main\_\_':  
-    mcp.run()
+\# Execute the SQL query
+cursor.execute("SELECT name, messages FROM chatters ORDER BY messages DESC")
+results \= cursor.fetchall()
+conn.close()
+
+\# Format the results into a structured list of dictionaries
+chatters \= \[{"name": name, "messages": messages} for name, messages in results\]
+return chatters
+
+\# Run the MCP server
+if \_\_name\_\_ \== '\_\_main\_\_':
+mcp.run()
 
 This tool connects to community.db, executes a query, and returns the data as a list of dictionaries—a structured format that an LLM can easily parse and present to the user.
 
@@ -210,27 +210,27 @@ Then, create the server file api\_server.py:
 
 Python
 
-\# api\_server.py  
-from mcp.server.fastmcp import FastMCP  
+\# api\_server.py
+from mcp.server.fastmcp import FastMCP
 import httpx
 
 mcp \= FastMCP("GitHub Code Fetcher")
 
-@mcp.tool()  
-async def get\_github\_code(url: str) \-\> str:  
-    """Fetch source code from a raw GitHub content URL."""  
-    try:  
-        async with httpx.AsyncClient() as client:  
-            response \= await client.get(url)  
-            response.raise\_for\_status()  \# Raise an exception for bad status codes  
-            return response.text  
-    except httpx.HTTPStatusError as e:  
-        return f"Error fetching URL: {e.response.status\_code}"  
-    except httpx.RequestError as e:  
-        return f"An error occurred while requesting {e.request.url\!r}."
+@mcp.tool()
+async def get\_github\_code(url: str) \-\> str:
+"""Fetch source code from a raw GitHub content URL."""
+try:
+async with httpx.AsyncClient() as client:
+response \= await client.get(url)
+response.raise\_for\_status()\# Raise an exception for bad status codes
+return response.text
+except httpx.HTTPStatusError as e:
+return f"Error fetching URL: {e.response.status\_code}"
+except httpx.RequestError as e:
+return f"An error occurred while requesting {e.request.url\!r}."
 
-if \_\_name\_\_ \== '\_\_main\_\_':  
-    mcp.run()
+if \_\_name\_\_ \== '\_\_main\_\_':
+mcp.run()
 
 FastMCP automatically detects that get\_github\_code is a coroutine function and will await it correctly when the tool is called, without any additional configuration required from the developer.
 
@@ -244,13 +244,13 @@ A static resource is useful for exposing data that does not change, such as appl
 
 Python
 
-\# Part of a server.py file  
+\# Part of a server.py file
 APP\_CONFIG \= {"theme": "dark", "version": "1.2.0", "features": \["search", "export"\]}
 
-@mcp.resource("data://config")  
-def get\_app\_config() \-\> dict:  
-    """Provides the application's static configuration."""  
-    return APP\_CONFIG
+@mcp.resource("data://config")
+def get\_app\_config() \-\> dict:
+"""Provides the application's static configuration."""
+return APP\_CONFIG
 
 A client can now request the URI data://config to retrieve this dictionary.
 
@@ -260,16 +260,16 @@ Resource templates allow for the creation of dynamic resources where parts of th
 
 Python
 
-\# Part of a server.py file  
-USER\_PROFILES \= {  
-    101: {"name": "Alice", "status": "active"},  
-    102: {"name": "Bob", "status": "inactive"},  
+\# Part of a server.py file
+USER\_PROFILES \= {
+101: {"name": "Alice", "status": "active"},
+102: {"name": "Bob", "status": "inactive"},
 }
 
-@mcp.resource("users://{user\_id}/profile")  
-def get\_user\_profile(user\_id: int) \-\> dict:  
-    """Retrieves a user's profile by their integer ID."""  
-    return USER\_PROFILES.get(user\_id, {"error": "User not found"})
+@mcp.resource("users://{user\_id}/profile")
+def get\_user\_profile(user\_id: int) \-\> dict:
+"""Retrieves a user's profile by their integer ID."""
+return USER\_PROFILES.get(user\_id, {"error": "User not found"})
 
 In this example, a client request for users://101/profile will automatically call get\_user\_profile(user\_id=101). This powerful feature enables the exposure of large, structured datasets through a clean, REST-like URI interface.
 
@@ -281,41 +281,41 @@ To access it, a developer simply adds a parameter type-hinted as Context to thei
 
 Python
 
-\# context\_server.py  
-from mcp.server.fastmcp import FastMCP, Context  
+\# context\_server.py
+from mcp.server.fastmcp import FastMCP, Context
 import asyncio
 
 mcp \= FastMCP("Advanced Server")
 
-@mcp.tool()  
-async def process\_files(files: list\[str\], ctx: Context) \-\> str:  
-    """Processes a list of files with logging and progress reporting."""  
-    total\_files \= len(files)  
-    await ctx.info(f"Starting to process {total\_files} files.")  
-      
-    for i, file\_uri in enumerate(files):  
-        \# Use the context to read a resource from the same server  
-        try:  
-            content \= await ctx.read\_resource(file\_uri)  
-            await ctx.info(f"Processing content from {file\_uri}...")  
-            \# Simulate processing work  
-            await asyncio.sleep(1)  
-        except Exception as e:  
-            await ctx.error(f"Failed to read resource {file\_uri}: {e}")
+@mcp.tool()
+async def process\_files(files: list\[str\], ctx: Context) \-\> str:
+"""Processes a list of files with logging and progress reporting."""
+total\_files \= len(files)
+await ctx.info(f"Starting to process {total\_files} files.")
 
-        \# Report progress back to the client  
-        await ctx.report\_progress(i \+ 1, total\_files)  
-          
-    await ctx.info("File processing complete.")  
-    return "Successfully processed all files."
+for i, file\_uri in enumerate(files):
+\# Use the context to read a resource from the same server
+try:
+content \= await ctx.read\_resource(file\_uri)
+await ctx.info(f"Processing content from {file\_uri}...")
+\# Simulate processing work
+await asyncio.sleep(1)
+except Exception as e:
+await ctx.error(f"Failed to read resource {file\_uri}: {e}")
 
-if \_\_name\_\_ \== '\_\_main\_\_':  
-    mcp.run()
+\# Report progress back to the client
+await ctx.report\_progress(i \+ 1, total\_files)
+
+await ctx.info("File processing complete.")
+return "Successfully processed all files."
+
+if \_\_name\_\_ \== '\_\_main\_\_':
+mcp.run()
 
 This example demonstrates several key features of the Context object:
 
-* **Logging (ctx.info, ctx.error)**: Sends structured log messages to the client, which can be displayed to the user in the Host application's UI.  
-* **Progress Reporting (ctx.report\_progress)**: Provides feedback for long-running operations, allowing the Host to display a progress bar or other visual indicator.  
+* **Logging (ctx.info, ctx.error)**: Sends structured log messages to the client, which can be displayed to the user in the Host application's UI.
+* **Progress Reporting (ctx.report\_progress)**: Provides feedback for long-running operations, allowing the Host to display a progress bar or other visual indicator.
 * **Intra-Server Resource Access (ctx.read\_resource)**: Enables a tool to access a resource exposed by the same server, facilitating the composition of complex workflows within a single server.
 
 The Context object is the key to building professional-grade, interactive MCP servers that provide a rich, responsive experience for the end-user.
@@ -336,8 +336,8 @@ The stdio (Standard Input/Output) transport is the simplest and most common meth
 
 This transport is ideal for:
 
-* Local development and testing.  
-* Tools that operate on the local filesystem.  
+* Local development and testing.
+* Tools that operate on the local filesystem.
 * Personal utilities that are not intended to be shared over a network.
 
 The stdio transport is the default for FastMCP. When mcp.run() is called without any arguments, it automatically uses this transport.23 This tightly-coupled deployment model is straightforward to manage, as the Host application is directly responsible for the server's entire lifecycle.
@@ -346,7 +346,7 @@ The stdio transport is the default for FastMCP. When mcp.run() is called without
 
 For a server to be accessible over a network, it must use an HTTP-based transport. This decouples the server from the Host, allowing it to run as an independent process—akin to a microservice—that can be deployed to a cloud environment, scaled independently, and accessed by multiple different users and Host applications.31
 
-* **Streamable HTTP**: This is the modern, recommended transport for remote servers. It uses standard HTTP POST requests for client-to-server messages. For server-to-client communication, it can either respond directly to the POST request or, for more interactive use cases, it can establish a Server-Sent Events (SSE) stream to push multiple messages over a persistent connection.31  
+* **Streamable HTTP**: This is the modern, recommended transport for remote servers. It uses standard HTTP POST requests for client-to-server messages. For server-to-client communication, it can either respond directly to the POST request or, for more interactive use cases, it can establish a Server-Sent Events (SSE) stream to push multiple messages over a persistent connection.31
 * **SSE (Legacy)**: This older transport also uses Server-Sent Events for server-to-client streaming but has a slightly different mechanism for client-to-server messages. It is still supported for compatibility with existing clients.29
 
 Implementing an HTTP-based transport requires embedding the MCP server within a web framework like FastAPI or Starlette. The following is a complete, practical example of how to expose a FastMCP server over SSE using Starlette, a lightweight ASGI framework.35
@@ -361,39 +361,39 @@ Next, create the server file http\_server.py:
 
 Python
 
-\# http\_server.py  
-from mcp.server.fastmcp import FastMCP  
-from mcp.server.sse import SseServerTransport  
-from starlette.applications import Starlette  
-from starlette.routing import Mount, Route  
+\# http\_server.py
+from mcp.server.fastmcp import FastMCP
+from mcp.server.sse import SseServerTransport
+from starlette.applications import Starlette
+from starlette.routing import Mount, Route
 import uvicorn
 
-\# 1\. Create the FastMCP server instance  
+\# 1\. Create the FastMCP server instance
 mcp \= FastMCP("My Remote Server")
 
-@mcp.tool()  
-def echo(message: str) \-\> str:  
-    """Returns the message it received."""  
-    return f"Server received: {message}"
+@mcp.tool()
+def echo(message: str) \-\> str:
+"""Returns the message it received."""
+return f"Server received: {message}"
 
-\# 2\. Create an SSE transport instance  
-\# The "/messages" path is an internal endpoint for client-to-server POSTs  
+\# 2\. Create an SSE transport instance
+\# The "/messages" path is an internal endpoint for client-to-server POSTs
 sse\_transport \= SseServerTransport("/messages")
 
-\# 3\. Define an ASGI application to handle the SSE connection  
-async def handle\_sse\_connection(scope, receive, send):  
-    async with sse\_transport.connect\_sse(scope, receive, send) as (read\_stream, write\_stream):  
-        \# Run the MCP server logic over the established streams  
-        await mcp.run(read\_stream, write\_stream)
+\# 3\. Define an ASGI application to handle the SSE connection
+async def handle\_sse\_connection(scope, receive, send):
+async with sse\_transport.connect\_sse(scope, receive, send) as (read\_stream, write\_stream):
+\# Run the MCP server logic over the established streams
+await mcp.run(read\_stream, write\_stream)
 
-\# 4\. Create a Starlette application with the required routes  
-\# The client connects to "/sse" to establish the event stream  
-\# The client POSTs messages to "/messages"  
+\# 4\. Create a Starlette application with the required routes
+\# The client connects to "/sse" to establish the event stream
+\# The client POSTs messages to "/messages"
 app \= Starlette(routes=)
 
-\# 5\. Run the web server using uvicorn  
-if \_\_name\_\_ \== "\_\_main\_\_":  
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+\# 5\. Run the web server using uvicorn
+if \_\_name\_\_ \== "\_\_main\_\_":
+uvicorn.run(app, host="0.0.0.0", port=8000)
 
 This server can now be run with python http\_server.py and accessed by any MCP client at the URL http://localhost:8000/sse.
 
@@ -417,8 +417,8 @@ Security is a paramount concern in any distributed system, and the MCP ecosystem
 
 The MCP specification is built on several key security principles that create a defense-in-depth strategy.6
 
-* **User Consent and Control**: The user must always be in control. As previously discussed, any action with potential side effects (i.e., a Tool call) requires explicit user approval through the Host application. Users must be able to review and authorize all significant operations.  
-* **Data Privacy**: Hosts must not transmit user data to a server without explicit consent. The protocol's design, which isolates servers from the full conversation context, is a key part of this principle.  
+* **User Consent and Control**: The user must always be in control. As previously discussed, any action with potential side effects (i.e., a Tool call) requires explicit user approval through the Host application. Users must be able to review and authorize all significant operations.
+* **Data Privacy**: Hosts must not transmit user data to a server without explicit consent. The protocol's design, which isolates servers from the full conversation context, is a key part of this principle.
 * **Tool Safety**: Tools represent arbitrary code execution and must be treated with caution. Host applications are expected to provide clear user interfaces that explain what a tool does before it is invoked.
 
 Security is a shared responsibility. While the Host enforces user consent, the server developer is responsible for securing their own application, especially when it is publicly accessible.
@@ -437,8 +437,8 @@ For example, a client application like Cursor can be configured to connect to a 
 
 For production-grade, multi-tenant services, the MCP specification recommends a much more robust and secure authentication flow based on modern industry standards 37:
 
-* **OAuth 2.1**: The modern, secure standard for delegated authorization.  
-* **Dynamic Client Registration (DCR) (RFC 7591\)**: Allows MCP clients to programmatically register themselves with an authorization server.  
+* **OAuth 2.1**: The modern, secure standard for delegated authorization.
+* **Dynamic Client Registration (DCR) (RFC 7591\)**: Allows MCP clients to programmatically register themselves with an authorization server.
 * **Authorization Server Metadata (RFC 8414\)**: Provides a standard way for clients to discover the endpoints and capabilities of an authorization server.
 
 This flow provides a secure way for users to grant an MCP client limited, revocable access to their data on a resource server (the MCP server) without sharing their primary credentials.
@@ -463,16 +463,16 @@ The mcp\[cli\] package extra, installed during the initial environment setup, in
 
 The typical workflow is as follows:
 
-1. **Run the Server in Development Mode:** From the terminal, execute the mcp dev command, pointing it to the server file.  
-   Bash  
-   uv run mcp dev server.py
+1. **Run the Server in Development Mode:** From the terminal, execute the mcp dev command, pointing it to the server file.
+ Bash
+ uv run mcp dev server.py
 
-2. **Open the Inspector:** The command will output a local URL (e.g., http://localhost:5173). Opening this URL in a web browser launches the MCP Inspector interface.42  
-3. **Connect and Test:** Within the Inspector, the developer can connect to the local server proxy. The UI will then populate with the server's discovered capabilities. The developer can:  
-   * List all available **Tools**, view their schemas, and execute them with custom input parameters.43  
-   * List and read the content of **Resources**.  
-   * List and test **Prompts**.  
-   * View logs and other messages sent from the server.
+2. **Open the Inspector:** The command will output a local URL (e.g., http://localhost:5173). Opening this URL in a web browser launches the MCP Inspector interface.42
+3. **Connect and Test:** Within the Inspector, the developer can connect to the local server proxy. The UI will then populate with the server's discovered capabilities. The developer can:
+ * List all available **Tools**, view their schemas, and execute them with custom input parameters.43
+ * List and read the content of **Resources**.
+ * List and test **Prompts**.
+ * View logs and other messages sent from the server.
 
 The Inspector is the primary tool for unit testing the functionality of each primitive, verifying schemas, and debugging the server's logic in a controlled environment.
 
@@ -486,33 +486,33 @@ Integration is achieved by adding a configuration block to the Host application'
 
 Using the sqlite\_server.py example from Section 4, the following configurations can be used. Note that absolute paths to the virtual environment's Python executable and the server script are required for robust configuration.
 
-Cursor (\~/.cursor/mcp.json):  
+Cursor (\~/.cursor/mcp.json):
 To add the server, navigate to Settings → MCP in Cursor and click "Add a New Global MCP Server." This will open the mcp.json file for editing.24
 
 JSON
 
-{  
-  "mcpServers": {  
-    "sqlite-community-chatters": {  
-      "command": "/path/to/your/project/.venv/bin/python",  
-      "args": \[  
-        "/path/to/your/project/sqlite\_server.py"  
-      \],  
-      "description": "MCP server to query top chatters from a SQLite database."  
-    }  
-  }  
+{
+"mcpServers": {
+"sqlite-community-chatters": {
+"command": "/path/to/your/project/.venv/bin/python",
+"args": \[
+"/path/to/your/project/sqlite\_server.py"
+\],
+"description": "MCP server to query top chatters from a SQLite database."
+}
+}
 }
 
-Claude Desktop (claude\_desktop\_config.json):  
+Claude Desktop (claude\_desktop\_config.json):
 Access the configuration file via Settings → Developer → Edit Config.24
 
 JSON
 
-{  
-  "servers":,  
-      "description": "MCP server to query top chatters from a SQLite database."  
-    }  
-  \]  
+{
+"servers":,
+"description": "MCP server to query top chatters from a SQLite database."
+}
+\]
 }
 
 After saving the configuration and restarting the Host application, the new server and its get\_top\_chatters tool will be available. The developer can then interact with the LLM using natural language (e.g., "Show me the list of top chatters") to trigger the tool, approve the execution, and verify that the data is correctly retrieved from the SQLite database and displayed in the chat interface. This final step validates the entire workflow, from natural language understanding to tool execution and response generation.
@@ -525,10 +525,10 @@ The Model Context Protocol represents a pivotal advancement in the architecture 
 
 This guide has provided a comprehensive journey through the process of building production-ready MCP servers in Python. The key best practices derived from this analysis are:
 
-* **Design with the Primitives in Mind:** Understand the distinct roles of Tools (model-controlled actions), Resources (application-controlled data), and Prompts (user-controlled workflows). Architecting a server around this tripartite structure is crucial for security and clarity.  
-* **Leverage FastMCP Intelligently:** Embrace the declarative, decorator-based API of FastMCP. Utilize Pythonic features like type hints and docstrings not just as documentation but as functional components that the framework uses to auto-generate schemas and descriptions.  
-* **Choose the Right Transport for the Architecture:** Select the stdio transport for local, embedded tools and the Streamable HTTP transport for building scalable, networked services. This choice fundamentally defines the server's deployment model and operational boundaries.  
-* **Prioritize Security and Authentication:** For any server exposed to a network, implement robust authentication. While the official Python SDK has limitations in this area, leverage third-party libraries like MCP Auth to implement the industry-standard OAuth 2.1 flow recommended by the protocol specification.  
+* **Design with the Primitives in Mind:** Understand the distinct roles of Tools (model-controlled actions), Resources (application-controlled data), and Prompts (user-controlled workflows). Architecting a server around this tripartite structure is crucial for security and clarity.
+* **Leverage FastMCP Intelligently:** Embrace the declarative, decorator-based API of FastMCP. Utilize Pythonic features like type hints and docstrings not just as documentation but as functional components that the framework uses to auto-generate schemas and descriptions.
+* **Choose the Right Transport for the Architecture:** Select the stdio transport for local, embedded tools and the Streamable HTTP transport for building scalable, networked services. This choice fundamentally defines the server's deployment model and operational boundaries.
+* **Prioritize Security and Authentication:** For any server exposed to a network, implement robust authentication. While the official Python SDK has limitations in this area, leverage third-party libraries like MCP Auth to implement the industry-standard OAuth 2.1 flow recommended by the protocol specification.
 * **Adopt a Rigorous Testing Workflow:** Use the MCP Inspector for rapid local development and unit testing of primitives. Follow up with end-to-end integration testing in real-world Host applications like Cursor or VS Code to ensure seamless user experience and functionality.
 
 ### **8.2. The Future of MCP**
@@ -539,55 +539,55 @@ By mastering the principles and practices outlined in this guide, developers are
 
 For continued learning and to stay abreast of the latest developments, developers are encouraged to consult the official documentation resources 22:
 
-* **Model Context Protocol Documentation:** [https://modelcontextprotocol.io/](https://modelcontextprotocol.io/)  
-* **Model Context Protocol Specification:** [https://modelcontextprotocol.io/specification/](https://modelcontextprotocol.io/specification/)  
+* **Model Context Protocol Documentation:** [https://modelcontextprotocol.io/](https://modelcontextprotocol.io/)
+* **Model Context Protocol Specification:** [https://modelcontextprotocol.io/specification/](https://modelcontextprotocol.io/specification/)
 * **Officially Supported Servers:** [https://modelcontextprotocol.io/examples](https://modelcontextprotocol.io/examples)
 
 #### **Obras citadas**
 
-1. Model Context Protocol (MCP) Explained \- Humanloop, fecha de acceso: agosto 17, 2025, [https://humanloop.com/blog/mcp](https://humanloop.com/blog/mcp)  
-2. MCP 101: An Introduction to Model Context Protocol \- DigitalOcean, fecha de acceso: agosto 17, 2025, [https://www.digitalocean.com/community/tutorials/model-context-protocol](https://www.digitalocean.com/community/tutorials/model-context-protocol)  
-3. Model Context Protocol \- Wikipedia, fecha de acceso: agosto 17, 2025, [https://en.wikipedia.org/wiki/Model\_Context\_Protocol](https://en.wikipedia.org/wiki/Model_Context_Protocol)  
-4. Model Context Protocol: Introduction, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/](https://modelcontextprotocol.io/)  
-5. Model Context Protocol (MCP) \- Anthropic API, fecha de acceso: agosto 17, 2025, [https://docs.anthropic.com/en/docs/mcp](https://docs.anthropic.com/en/docs/mcp)  
-6. Specification \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/specification/2025-06-18](https://modelcontextprotocol.io/specification/2025-06-18)  
-7. Model Context Protocol (MCP) an overview \- Philschmid, fecha de acceso: agosto 17, 2025, [https://www.philschmid.de/mcp-introduction](https://www.philschmid.de/mcp-introduction)  
-8. Why we open sourced our MCP server, and what it means for you \- The GitHub Blog, fecha de acceso: agosto 17, 2025, [https://github.blog/open-source/maintainers/why-we-open-sourced-our-mcp-server-and-what-it-means-for-you/](https://github.blog/open-source/maintainers/why-we-open-sourced-our-mcp-server-and-what-it-means-for-you/)  
-9. Architecture Overview \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/concepts/architecture](https://modelcontextprotocol.io/docs/concepts/architecture)  
-10. What is Model Context Protocol? (MCP) Architecture Overview | by Tahir | Medium, fecha de acceso: agosto 17, 2025, [https://medium.com/@tahirbalarabe2/what-is-model-context-protocol-mcp-architecture-overview-c75f20ba4498](https://medium.com/@tahirbalarabe2/what-is-model-context-protocol-mcp-architecture-overview-c75f20ba4498)  
-11. Architecture \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/specification/2025-06-18/architecture](https://modelcontextprotocol.io/specification/2025-06-18/architecture)  
-12. Example Servers \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/examples](https://modelcontextprotocol.io/examples)  
-13. What Is the Model Context Protocol (MCP) and How It Works \- Descope, fecha de acceso: agosto 17, 2025, [https://www.descope.com/learn/post/mcp](https://www.descope.com/learn/post/mcp)  
-14. Build Your Own MCP Server (Python Guide) \- YouTube, fecha de acceso: agosto 17, 2025, [https://www.youtube.com/watch?v=8rieuXTvBtM](https://www.youtube.com/watch?v=8rieuXTvBtM)  
-15. Server Concepts \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/learn/server-concepts](https://modelcontextprotocol.io/docs/learn/server-concepts)  
-16. jlowin/fastmcp: The fast, Pythonic way to build MCP servers and clients \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/jlowin/fastmcp](https://github.com/jlowin/fastmcp)  
-17. Specification \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/specification/2025-03-26](https://modelcontextprotocol.io/specification/2025-03-26)  
-18. FastMCP Tutorial: Building MCP Servers in Python From Scratch \- Firecrawl, fecha de acceso: agosto 17, 2025, [https://www.firecrawl.dev/blog/fastmcp-tutorial-building-mcp-servers-python](https://www.firecrawl.dev/blog/fastmcp-tutorial-building-mcp-servers-python)  
-19. A Beginner's Guide to Use FastMCP \- Apidog, fecha de acceso: agosto 17, 2025, [https://apidog.com/blog/fastmcp/](https://apidog.com/blog/fastmcp/)  
-20. How to Create an MCP Server in Python \- FastMCP, fecha de acceso: agosto 17, 2025, [https://gofastmcp.com/tutorials/create-mcp-server](https://gofastmcp.com/tutorials/create-mcp-server)  
-21. Model Context Protocol (MCP) Tutorial: Build Your First MCP Server in 6 Steps, fecha de acceso: agosto 17, 2025, [https://towardsdatascience.com/model-context-protocol-mcp-tutorial-build-your-first-mcp-server-in-6-steps/](https://towardsdatascience.com/model-context-protocol-mcp-tutorial-build-your-first-mcp-server-in-6-steps/)  
-22. The official Python SDK for Model Context Protocol servers and clients \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk)  
-23. How to Build an MCP Server in Python: A Complete Guide \- Scrapfly, fecha de acceso: agosto 17, 2025, [https://scrapfly.io/blog/posts/how-to-build-an-mcp-server-in-python-a-complete-guide](https://scrapfly.io/blog/posts/how-to-build-an-mcp-server-in-python-a-complete-guide)  
-24. MCP Server in Python — Everything I Wish I'd Known on Day One ..., fecha de acceso: agosto 17, 2025, [https://www.digitalocean.com/community/tutorials/mcp-server-python](https://www.digitalocean.com/community/tutorials/mcp-server-python)  
-25. Quickstart \- FastMCP, fecha de acceso: agosto 17, 2025, [https://gofastmcp.com/getting-started/quickstart](https://gofastmcp.com/getting-started/quickstart)  
-26. raw.githubusercontent.com, fecha de acceso: agosto 17, 2025, [https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/refs/heads/main/README.md](https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/refs/heads/main/README.md)  
-27. How to Write Your MCP Server in Python \- RidgeRun.ai, fecha de acceso: agosto 17, 2025, [https://www.ridgerun.ai/post/how-to-write-your-mcp-server-in-python](https://www.ridgerun.ai/post/how-to-write-your-mcp-server-in-python)  
-28. fastmcp \- PyPI, fecha de acceso: agosto 17, 2025, [https://pypi.org/project/fastmcp/2.2.0/](https://pypi.org/project/fastmcp/2.2.0/)  
-29. What are MCP transports? \- Speakeasy, fecha de acceso: agosto 17, 2025, [https://www.speakeasy.com/mcp/building-servers/protocol-reference/transports](https://www.speakeasy.com/mcp/building-servers/protocol-reference/transports)  
-30. Transports \- Model Context Protocol （MCP）, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.info/docs/concepts/transports/](https://modelcontextprotocol.info/docs/concepts/transports/)  
-31. Transports \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/concepts/transports](https://modelcontextprotocol.io/docs/concepts/transports)  
-32. Model context protocol (MCP) \- OpenAI Agents SDK, fecha de acceso: agosto 17, 2025, [https://openai.github.io/openai-agents-python/mcp/](https://openai.github.io/openai-agents-python/mcp/)  
-33. Discovering MCP Servers in Python | CodeSignal Learn, fecha de acceso: agosto 17, 2025, [https://codesignal.com/learn/courses/developing-and-integrating-a-mcp-server-in-python/lessons/getting-started-with-fastmcp-running-your-first-mcp-server-with-stdio-and-sse](https://codesignal.com/learn/courses/developing-and-integrating-a-mcp-server-in-python/lessons/getting-started-with-fastmcp-running-your-first-mcp-server-with-stdio-and-sse)  
-34. SSE Transport \- CrewAI Documentation, fecha de acceso: agosto 17, 2025, [https://docs.crewai.com/en/mcp/sse](https://docs.crewai.com/en/mcp/sse)  
-35. Building a Server-Sent Events (SSE) MCP Server with FastAPI \- Ragie, fecha de acceso: agosto 17, 2025, [https://www.ragie.ai/blog/building-a-server-sent-events-sse-mcp-server-with-fastapi](https://www.ragie.ai/blog/building-a-server-sent-events-sse-mcp-server-with-fastapi)  
-36. Model Context Protocol (MCP) \- Stripe Documentation, fecha de acceso: agosto 17, 2025, [https://docs.stripe.com/mcp](https://docs.stripe.com/mcp)  
-37. Implement user authentication functionality in the MCP server | by Daiki Yamashita (FLECT), fecha de acceso: agosto 17, 2025, [https://medium.com/@daiki.yamashita\_67366/implement-user-authentication-functionality-in-the-mcp-server-9b241b4a18a6](https://medium.com/@daiki.yamashita_67366/implement-user-authentication-functionality-in-the-mcp-server-9b241b4a18a6)  
-38. Get started | MCP Auth, fecha de acceso: agosto 17, 2025, [https://mcp-auth.dev/docs](https://mcp-auth.dev/docs)  
-39. MCP Auth \- Plug-and-play auth for MCP servers | MCP Auth, fecha de acceso: agosto 17, 2025, [https://mcp-auth.dev/](https://mcp-auth.dev/)  
-40. Model Context Protocol \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/modelcontextprotocol](https://github.com/modelcontextprotocol)  
-41. MCP \- Model Context Protocol \- SDK \- Python \- YouTube, fecha de acceso: agosto 17, 2025, [https://www.youtube.com/watch?v=oq3dkNm51qc](https://www.youtube.com/watch?v=oq3dkNm51qc)  
-42. FastMCP: The fastway to build MCP servers. | by CellCS \- Medium, fecha de acceso: agosto 17, 2025, [https://medium.com/@shmilysyg/fastmcp-the-fastway-to-build-mcp-servers-aa14f88536d2](https://medium.com/@shmilysyg/fastmcp-the-fastway-to-build-mcp-servers-aa14f88536d2)  
-43. Model Context Protocol \- Explained\! (with Python example) \- YouTube, fecha de acceso: agosto 17, 2025, [https://www.youtube.com/watch?v=JF14z6XO4Ho\&pp=0gcJCfwAo7VqN5tD](https://www.youtube.com/watch?v=JF14z6XO4Ho&pp=0gcJCfwAo7VqN5tD)  
-44. Use MCP servers in VS Code, fecha de acceso: agosto 17, 2025, [https://code.visualstudio.com/docs/copilot/chat/mcp-servers](https://code.visualstudio.com/docs/copilot/chat/mcp-servers)  
-45. modelcontextprotocol/servers: Model Context Protocol Servers \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers)  
+1. Model Context Protocol (MCP) Explained \- Humanloop, fecha de acceso: agosto 17, 2025, [https://humanloop.com/blog/mcp](https://humanloop.com/blog/mcp)
+2. MCP 101: An Introduction to Model Context Protocol \- DigitalOcean, fecha de acceso: agosto 17, 2025, [https://www.digitalocean.com/community/tutorials/model-context-protocol](https://www.digitalocean.com/community/tutorials/model-context-protocol)
+3. Model Context Protocol \- Wikipedia, fecha de acceso: agosto 17, 2025, [https://en.wikipedia.org/wiki/Model\_Context\_Protocol](https://en.wikipedia.org/wiki/Model_Context_Protocol)
+4. Model Context Protocol: Introduction, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/](https://modelcontextprotocol.io/)
+5. Model Context Protocol (MCP) \- Anthropic API, fecha de acceso: agosto 17, 2025, [https://docs.anthropic.com/en/docs/mcp](https://docs.anthropic.com/en/docs/mcp)
+6. Specification \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/specification/2025-06-18](https://modelcontextprotocol.io/specification/2025-06-18)
+7. Model Context Protocol (MCP) an overview \- Philschmid, fecha de acceso: agosto 17, 2025, [https://www.philschmid.de/mcp-introduction](https://www.philschmid.de/mcp-introduction)
+8. Why we open sourced our MCP server, and what it means for you \- The GitHub Blog, fecha de acceso: agosto 17, 2025, [https://github.blog/open-source/maintainers/why-we-open-sourced-our-mcp-server-and-what-it-means-for-you/](https://github.blog/open-source/maintainers/why-we-open-sourced-our-mcp-server-and-what-it-means-for-you/)
+9. Architecture Overview \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/concepts/architecture](https://modelcontextprotocol.io/docs/concepts/architecture)
+10. What is Model Context Protocol? (MCP) Architecture Overview | by Tahir | Medium, fecha de acceso: agosto 17, 2025, [https://medium.com/@tahirbalarabe2/what-is-model-context-protocol-mcp-architecture-overview-c75f20ba4498](https://medium.com/@tahirbalarabe2/what-is-model-context-protocol-mcp-architecture-overview-c75f20ba4498)
+11. Architecture \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/specification/2025-06-18/architecture](https://modelcontextprotocol.io/specification/2025-06-18/architecture)
+12. Example Servers \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/examples](https://modelcontextprotocol.io/examples)
+13. What Is the Model Context Protocol (MCP) and How It Works \- Descope, fecha de acceso: agosto 17, 2025, [https://www.descope.com/learn/post/mcp](https://www.descope.com/learn/post/mcp)
+14. Build Your Own MCP Server (Python Guide) \- YouTube, fecha de acceso: agosto 17, 2025, [https://www.youtube.com/watch?v=8rieuXTvBtM](https://www.youtube.com/watch?v=8rieuXTvBtM)
+15. Server Concepts \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/learn/server-concepts](https://modelcontextprotocol.io/docs/learn/server-concepts)
+16. jlowin/fastmcp: The fast, Pythonic way to build MCP servers and clients \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/jlowin/fastmcp](https://github.com/jlowin/fastmcp)
+17. Specification \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/specification/2025-03-26](https://modelcontextprotocol.io/specification/2025-03-26)
+18. FastMCP Tutorial: Building MCP Servers in Python From Scratch \- Firecrawl, fecha de acceso: agosto 17, 2025, [https://www.firecrawl.dev/blog/fastmcp-tutorial-building-mcp-servers-python](https://www.firecrawl.dev/blog/fastmcp-tutorial-building-mcp-servers-python)
+19. A Beginner's Guide to Use FastMCP \- Apidog, fecha de acceso: agosto 17, 2025, [https://apidog.com/blog/fastmcp/](https://apidog.com/blog/fastmcp/)
+20. How to Create an MCP Server in Python \- FastMCP, fecha de acceso: agosto 17, 2025, [https://gofastmcp.com/tutorials/create-mcp-server](https://gofastmcp.com/tutorials/create-mcp-server)
+21. Model Context Protocol (MCP) Tutorial: Build Your First MCP Server in 6 Steps, fecha de acceso: agosto 17, 2025, [https://towardsdatascience.com/model-context-protocol-mcp-tutorial-build-your-first-mcp-server-in-6-steps/](https://towardsdatascience.com/model-context-protocol-mcp-tutorial-build-your-first-mcp-server-in-6-steps/)
+22. The official Python SDK for Model Context Protocol servers and clients \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/modelcontextprotocol/python-sdk](https://github.com/modelcontextprotocol/python-sdk)
+23. How to Build an MCP Server in Python: A Complete Guide \- Scrapfly, fecha de acceso: agosto 17, 2025, [https://scrapfly.io/blog/posts/how-to-build-an-mcp-server-in-python-a-complete-guide](https://scrapfly.io/blog/posts/how-to-build-an-mcp-server-in-python-a-complete-guide)
+24. MCP Server in Python — Everything I Wish I'd Known on Day One ..., fecha de acceso: agosto 17, 2025, [https://www.digitalocean.com/community/tutorials/mcp-server-python](https://www.digitalocean.com/community/tutorials/mcp-server-python)
+25. Quickstart \- FastMCP, fecha de acceso: agosto 17, 2025, [https://gofastmcp.com/getting-started/quickstart](https://gofastmcp.com/getting-started/quickstart)
+26. raw.githubusercontent.com, fecha de acceso: agosto 17, 2025, [https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/refs/heads/main/README.md](https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/refs/heads/main/README.md)
+27. How to Write Your MCP Server in Python \- RidgeRun.ai, fecha de acceso: agosto 17, 2025, [https://www.ridgerun.ai/post/how-to-write-your-mcp-server-in-python](https://www.ridgerun.ai/post/how-to-write-your-mcp-server-in-python)
+28. fastmcp \- PyPI, fecha de acceso: agosto 17, 2025, [https://pypi.org/project/fastmcp/2.2.0/](https://pypi.org/project/fastmcp/2.2.0/)
+29. What are MCP transports? \- Speakeasy, fecha de acceso: agosto 17, 2025, [https://www.speakeasy.com/mcp/building-servers/protocol-reference/transports](https://www.speakeasy.com/mcp/building-servers/protocol-reference/transports)
+30. Transports \- Model Context Protocol （MCP）, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.info/docs/concepts/transports/](https://modelcontextprotocol.info/docs/concepts/transports/)
+31. Transports \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/concepts/transports](https://modelcontextprotocol.io/docs/concepts/transports)
+32. Model context protocol (MCP) \- OpenAI Agents SDK, fecha de acceso: agosto 17, 2025, [https://openai.github.io/openai-agents-python/mcp/](https://openai.github.io/openai-agents-python/mcp/)
+33. Discovering MCP Servers in Python | CodeSignal Learn, fecha de acceso: agosto 17, 2025, [https://codesignal.com/learn/courses/developing-and-integrating-a-mcp-server-in-python/lessons/getting-started-with-fastmcp-running-your-first-mcp-server-with-stdio-and-sse](https://codesignal.com/learn/courses/developing-and-integrating-a-mcp-server-in-python/lessons/getting-started-with-fastmcp-running-your-first-mcp-server-with-stdio-and-sse)
+34. SSE Transport \- CrewAI Documentation, fecha de acceso: agosto 17, 2025, [https://docs.crewai.com/en/mcp/sse](https://docs.crewai.com/en/mcp/sse)
+35. Building a Server-Sent Events (SSE) MCP Server with FastAPI \- Ragie, fecha de acceso: agosto 17, 2025, [https://www.ragie.ai/blog/building-a-server-sent-events-sse-mcp-server-with-fastapi](https://www.ragie.ai/blog/building-a-server-sent-events-sse-mcp-server-with-fastapi)
+36. Model Context Protocol (MCP) \- Stripe Documentation, fecha de acceso: agosto 17, 2025, [https://docs.stripe.com/mcp](https://docs.stripe.com/mcp)
+37. Implement user authentication functionality in the MCP server | by Daiki Yamashita (FLECT), fecha de acceso: agosto 17, 2025, [https://medium.com/@daiki.yamashita\_67366/implement-user-authentication-functionality-in-the-mcp-server-9b241b4a18a6](https://medium.com/@daiki.yamashita_67366/implement-user-authentication-functionality-in-the-mcp-server-9b241b4a18a6)
+38. Get started | MCP Auth, fecha de acceso: agosto 17, 2025, [https://mcp-auth.dev/docs](https://mcp-auth.dev/docs)
+39. MCP Auth \- Plug-and-play auth for MCP servers | MCP Auth, fecha de acceso: agosto 17, 2025, [https://mcp-auth.dev/](https://mcp-auth.dev/)
+40. Model Context Protocol \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/modelcontextprotocol](https://github.com/modelcontextprotocol)
+41. MCP \- Model Context Protocol \- SDK \- Python \- YouTube, fecha de acceso: agosto 17, 2025, [https://www.youtube.com/watch?v=oq3dkNm51qc](https://www.youtube.com/watch?v=oq3dkNm51qc)
+42. FastMCP: The fastway to build MCP servers. | by CellCS \- Medium, fecha de acceso: agosto 17, 2025, [https://medium.com/@shmilysyg/fastmcp-the-fastway-to-build-mcp-servers-aa14f88536d2](https://medium.com/@shmilysyg/fastmcp-the-fastway-to-build-mcp-servers-aa14f88536d2)
+43. Model Context Protocol \- Explained\! (with Python example) \- YouTube, fecha de acceso: agosto 17, 2025, [https://www.youtube.com/watch?v=JF14z6XO4Ho\&pp=0gcJCfwAo7VqN5tD](https://www.youtube.com/watch?v=JF14z6XO4Ho&pp=0gcJCfwAo7VqN5tD)
+44. Use MCP servers in VS Code, fecha de acceso: agosto 17, 2025, [https://code.visualstudio.com/docs/copilot/chat/mcp-servers](https://code.visualstudio.com/docs/copilot/chat/mcp-servers)
+45. modelcontextprotocol/servers: Model Context Protocol Servers \- GitHub, fecha de acceso: agosto 17, 2025, [https://github.com/modelcontextprotocol/servers](https://github.com/modelcontextprotocol/servers)
 46. SDKs \- Model Context Protocol, fecha de acceso: agosto 17, 2025, [https://modelcontextprotocol.io/docs/sdk](https://modelcontextprotocol.io/docs/sdk)

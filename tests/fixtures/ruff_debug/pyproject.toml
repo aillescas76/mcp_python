@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp_pytools"
+version = "0.0.1"
+description = "MCP server for Python code navigation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "mcp[cli]",
+]
+
+[project.urls]
+Homepage = "https://github.com/user/mcp_python" # Placeholder
+
+[project.scripts]
+mcp-pytools-server = "mcp_pytools.server:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "ipdb",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+]
+
+[tool.ruff.format]
+quote-style = "double"

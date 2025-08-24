@@ -138,26 +138,27 @@ This plan breaks the project into clear, verifiable tasks suitable for junior de
 - Review: Includes ranges and container names.
 
 ### 4.2 Find Definition
-- Goal: Jump to definition from position.
+- Goal: Jump to definition from a symbol name.
 - Deliverables: `tools/find_definition.py`
-- Input: `{uri, position:{line,column}}`
-- Output: `Location | null`
-- Steps:
-  1) Identify token at position (use tokenize).
-  2) Resolve in local scopes, then imports (alias handling), then project-level defs.
-  3) Return first-best location.
-- Acceptance: Works for local vars, functions, imported names.
-- Review: Conservative for dynamic attributes; returns null if unsure.
-
-### 4.3 Find References
-- Goal: Static reference search.
-- Deliverables: `tools/find_references.py`
-- Input: `{uri, position}` or `{symbol}`
+- Input: `{symbol: str}`
 - Output: `[Location]`
 - Steps:
-  1) Resolve target definition as in 4.2.
-  2) Walk modules to find Name nodes matching and bound to target via scope analysis.
-- Acceptance: Finds refs in same module and via imports when alias resolves.
+  1) Look up symbol in the project index's `defs_by_name`.
+  2) Handle qualified names (e.g., `module.ClassName.method`).
+  3) Return all matching definition locations.
+- Acceptance: Works for functions, classes, and methods defined in the project.
+- Review: Returns multiple locations for ambiguous symbols.
+
+### 4.3 Find References
+- Goal: Static reference search by symbol.
+- Deliverables: `tools/find_references.py`
+- Input: `{symbol: str}`
+- Output: `[Location]`
+- Steps:
+  1) Resolve target definition(s) for the symbol using the Find Definition tool/logic.
+  2) For each definition, walk modules to find Name nodes that refer to it.
+  3) Use scope analysis to ensure references are correct.
+- Acceptance: Finds all references to a symbol across the project.
 - Review: Avoid false positives by respecting scope and alias maps.
 
 ### 4.4 Import Graph Tool
