@@ -1,15 +1,26 @@
+from inspect import Parameter, Signature
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
+
 from mcp.server.fastmcp import FastMCP
-from functools import partial
 
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools import tool_registry
-from mcp_pytools.tools.tool import ToolContext
+from mcp_pytools.tools.tool import Tool, ToolContext
 
 mcp = FastMCP("Python Code Tools")
 
 PROJECT_ROOT = Path("/home/aic/code/mcp_python")
+
+JSON_SCHEMA_TO_PYTHON_TYPE = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "object": dict,
+}
+
 
 class ServerContext(ToolContext):
     def __init__(self, project_root: Path):
@@ -25,19 +36,54 @@ class ServerContext(ToolContext):
         self._project_index.build()
         print(f"Index built. {len(self._project_index.modules)} modules indexed.")
 
-def create_tool_handler(tool, context: ServerContext):
+
+def create_tool_handler(tool: Tool, context: ServerContext):
+    """Creates a handler function for a given tool that FastMCP can use."""
+
     async def handler(**kwargs):
         try:
+            # Note: We assume the concrete tool's handle method accepts the context.
             return await tool.handle(context, **kwargs)
         except Exception as e:
+            # Basic error handling, can be improved.
             return {
                 "error": {
-                    "code": -32000,
-                    "message": f"Tool execution failed: {e}",
+                    "code": -32000,  # Generic server error
+                    "message": f"Tool '{tool.name}' execution failed: {type(e).__name__}",
                     "data": str(e),
                 }
             }
+
+    # Dynamically create the function signature for FastMCP's inspection
+    params = []
+    schema = tool.schema
+    required_params = schema.get("required", [])
+    if "properties" in schema:
+        for name, prop_schema in schema["properties"].items():
+            python_type = JSON_SCHEMA_TO_PYTHON_TYPE.get(
+                prop_schema.get("type"), Any
+            )
+
+            default = Parameter.empty
+            # If a parameter is not in the 'required' list, mark it as optional
+            if name not in required_params:
+                python_type = Optional[python_type]
+                default = None
+
+            params.append(
+                Parameter(
+                    name,
+                    Parameter.POSITIONAL_OR_KEYWORD,
+                    annotation=python_type,
+                    default=default,
+                )
+            )
+
+    handler.__signature__ = Signature(params)
+    handler.__name__ = tool.name
+    handler.__doc__ = tool.description
     return handler
+
 
 def main():
     """
@@ -46,26 +92,14 @@ def main():
     context = ServerContext(PROJECT_ROOT)
     context.build_index()
 
+    # Discover and register all tools with FastMCP
     for tool in tool_registry:
         handler = create_tool_handler(tool, context)
-        # Manually create a signature for the tool
-        # This is a bit of a hack, but it's the easiest way to make it work with FastMCP
-        # which relies on function signatures to generate the tool schema.
-        from inspect import Parameter, Signature
-        params = [
-            Parameter(name, Parameter.POSITIONAL_OR_KEYWORD, annotation=p.get("type", Any))
-            for name, p in tool.schema.get("properties", {}).items()
-        ]
-        sig = Signature(params)
-
-        handler.__signature__ = sig
-        handler.__name__ = tool.name
-        handler.__doc__ = tool.description
-
         mcp.tool()(handler)
 
-    print("MCP Python Tools Server starting...")
+    print(f"MCP Python Tools Server starting with {len(tool_registry._tools)} tools...")
     mcp.run()
+
 
 if __name__ == "__main__":
     main()
