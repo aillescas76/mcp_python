@@ -35,6 +35,7 @@ def my_func():
     )
     return tmp_path
 
+
 @pytest.mark.anyio
 async def test_organize_imports_dry_run(organize_imports_project: Path):
     root = organize_imports_project
@@ -57,10 +58,10 @@ async def test_organize_imports_dry_run(organize_imports_project: Path):
  import os
  import sys
 +from collections import defaultdict
- 
+
 -from collections import defaultdict
 -import json
- 
+
  def my_func():
      pass
 """
@@ -70,10 +71,10 @@ async def test_organize_imports_dry_run(organize_imports_project: Path):
     # and the header might be different. We'll check the core part of the diff.
     assert expected_diff.split("@@", 2)[2] in result["diff"]
 
-
     # Check that the file is not modified
     original_content = (root / "module_to_organize.py").read_text()
     assert "import os\nimport sys" in original_content
+
 
 @pytest.mark.anyio
 async def test_organize_imports_apply(organize_imports_project: Path):
