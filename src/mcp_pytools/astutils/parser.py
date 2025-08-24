@@ -11,7 +11,7 @@ class Position:
     column: int
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"line": self.line, "character": self.column}
+        return {"line": self.line, "column": self.column}
 
 
 @dataclasses.dataclass

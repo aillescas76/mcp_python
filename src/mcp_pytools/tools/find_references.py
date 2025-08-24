@@ -1,6 +1,8 @@
-"""Tool to find all references to a symbol."""
+"""
+Tool to find all references to a symbol."""
 
 import ast
+from pathlib import Path
 from typing import Any, Dict, List
 
 from .find_definition import Location
@@ -61,6 +63,22 @@ class FindReferencesTool(Tool):
             visitor.visit(file_module.tree)
             for ref_node in visitor.references:
                 if hasattr(ref_node, "_range"):
-                    locations.append(Location(uri=file_uri, range=ref_node._range))
+                    file_path = Path(file_uri.replace("file://", ""))
+                    file_content = context.project_index.file_cache.get_text(file_path)
+                    lines = file_content.splitlines()
+                    start_line = ref_node._range.start.line
+                    end_line = ref_node._range.end.line
+                    start_col = ref_node._range.start.column
+                    end_col = ref_node._range.end.column
+
+                    if start_line == end_line:
+                        text = lines[start_line][start_col:end_col]
+                    else:
+                        text_lines = [lines[start_line][start_col:]]
+                        text_lines.extend(lines[start_line + 1:end_line])
+                        text_lines.append(lines[end_line][:end_col])
+                        text = "\n".join(text_lines)
+
+                    locations.append(Location(uri=file_uri, range=ref_node._range, text=text))
 
         return [loc.to_dict() for loc in locations]
