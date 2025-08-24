@@ -1,8 +1,11 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.docstring_lints import DocstringLintsTool
 from mcp_pytools.tools.tool import ToolContext
+
 
 class MockToolContext(ToolContext):
     def __init__(self, index: ProjectIndex):
@@ -33,7 +36,7 @@ class _PrivateClass:
     def _private_method_with_docstring(self):
         """Docstring."""
         pass
-    
+
     def _private_method_without_docstring(self):
         pass
 '''

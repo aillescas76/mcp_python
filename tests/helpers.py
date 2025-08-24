@@ -1,8 +1,10 @@
-from typing import List, Dict, Any
-from mcp_pytools.tools.find_definition import Location
-from mcp_pytools.astutils.parser import Range, Position
-from mcp_pytools.tools.tool import ToolContext
+from typing import Any, Dict, List
+
+from mcp_pytools.astutils.parser import Position, Range
 from mcp_pytools.index.project import ProjectIndex
+from mcp_pytools.tools.find_definition import Location
+from mcp_pytools.tools.tool import ToolContext
+
 
 class MockToolContext(ToolContext):
     def __init__(self, index: ProjectIndex):

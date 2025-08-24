@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.rename_symbol import RenameSymbolTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def rename_project(tmp_path: Path) -> Path:
@@ -58,7 +62,9 @@ async def test_rename_symbol_function_dry_run(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "my_function"
     new_symbol = "new_function_name"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
     assert "modified_content" in result
     modified_content = result["modified_content"]
@@ -80,7 +86,9 @@ async def test_rename_symbol_function_apply(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "my_function"
     new_symbol = "new_function_name"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -99,7 +107,9 @@ async def test_rename_symbol_class_dry_run(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "MyClass"
     new_symbol = "NewClass"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
     assert "modified_content" in result
     modified_content = result["modified_content"]
@@ -121,7 +131,9 @@ async def test_rename_symbol_class_apply(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "MyClass"
     new_symbol = "NewClass"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -140,7 +152,9 @@ async def test_rename_symbol_method_dry_run(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "get_value"
     new_symbol = "retrieve_value"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
     assert "modified_content" in result
     modified_content = result["modified_content"]
@@ -162,7 +176,9 @@ async def test_rename_symbol_method_apply(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "get_value"
     new_symbol = "retrieve_value"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -181,7 +197,9 @@ async def test_rename_symbol_variable_dry_run(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "GLOBAL_VAR"
     new_symbol = "GLOBAL_FOO_VAR"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
     assert "modified_content" in result
     modified_content = result["modified_content"]
@@ -203,7 +221,9 @@ async def test_rename_symbol_variable_apply(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "GLOBAL_VAR"
     new_symbol = "GLOBAL_FOO_VAR"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -222,7 +242,9 @@ async def test_rename_symbol_not_found(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "non_existent_symbol"
     new_symbol = "new_name"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
     assert "modified_content" in result
     assert old_symbol not in result["modified_content"]
@@ -237,8 +259,12 @@ async def test_rename_symbol_empty_names(rename_project: Path):
     tool = RenameSymbolTool()
 
     file_path = str(root / "module1.py")
-    result = await tool.handle(context, file_path=file_path, old_name="", new_name="new_name", apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name="", new_name="new_name", apply=False
+    )
     assert "error" in result
 
-    result = await tool.handle(context, file_path=file_path, old_name="old_name", new_name="", apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name="old_name", new_name="", apply=False
+    )
     assert "error" in result

@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.organize_imports import OrganizeImportsTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def organize_imports_project(tmp_path: Path) -> Path:
@@ -45,7 +49,8 @@ async def test_organize_imports_dry_run(organize_imports_project: Path):
     assert "diff" in result
     assert result["diff"]
     # Expected diff for import reordering
-    expected_diff_part = """--- a/{path}
+    expected_diff_part = """
+--- a/{path}
 +++ b/{path}
 @@ -1,8 +1,8 @@
 +import json
@@ -89,4 +94,12 @@ async def test_organize_imports_apply(organize_imports_project: Path):
     # Check that the file is modified
     modified_content = file_to_organize.read_text()
     assert modified_content != original_content
-    assert "import json\nimport os\nimport sys\nfrom collections import defaultdict\n\n\ndef my_func():\n    pass\n" == modified_content
+    expected_content = (
+        "import json\n"
+        "import os\n"
+        "import sys\n"
+        "from collections import defaultdict\n\n\n"
+        "def my_func():\n"
+        "    pass\n"
+    )
+    assert expected_content == modified_content

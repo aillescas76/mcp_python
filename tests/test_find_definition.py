@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.find_definition import FindDefinitionTool, Location
-from .helpers import locations_from_data, MockToolContext
+from mcp_pytools.tools.find_definition import FindDefinitionTool
+
+from .helpers import MockToolContext, locations_from_data
+
 
 @pytest.fixture
 def find_def_project(tmp_path: Path) -> Path:

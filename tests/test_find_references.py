@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.find_references import FindReferencesTool
-from .helpers import locations_from_data, MockToolContext
+
+from .helpers import MockToolContext, locations_from_data
+
 
 @pytest.fixture
 def find_refs_project(tmp_path: Path) -> Path:

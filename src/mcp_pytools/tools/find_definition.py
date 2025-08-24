@@ -54,7 +54,13 @@ class FindDefinitionTool(Tool):
                                 if hasattr(node, "name") and node.name == symbol:
                                     text = ast.get_source_segment(file_content, node)
                                     if text:
-                                        locations.append(Location(uri=uri, range=def_symbol.range, text=text))
+                                        locations.append(
+                                            Location(
+                                                uri=uri,
+                                                range=def_symbol.range,
+                                                text=text,
+                                            )
+                                        )
                                         break
                         # Assuming one symbol is in one doc
                         break

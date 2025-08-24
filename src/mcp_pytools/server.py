@@ -1,7 +1,7 @@
 import argparse
 from inspect import Parameter, Signature
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from mcp.server.fastmcp import FastMCP
 

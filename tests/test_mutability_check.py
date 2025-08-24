@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.mutability_check import MutabilityCheckTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def mutability_check_project(tmp_path: Path) -> Path:

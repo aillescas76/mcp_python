@@ -101,49 +101,11 @@ def walk_text_files(root: Path) -> Iterator[Path]:
         Paths to text files that are not ignored.
     """
     # A simple heuristic for text files. Can be expanded.
-    TEXT_FILE_EXTENSIONS = {".py", ".txt", ".md", ".json", ".yaml", ".yml", ".xml", ".html", ".css", ".js", ".ts", ".jsx", ".tsx", ".java", ".c", ".cpp", ".h", ".hpp", ".go", ".rs", ".toml", ".ini", ".cfg"}
-    yield from _walk_files(root, lambda p: p.suffix in TEXT_FILE_EXTENSIONS)
-
-
-def _walk_files(root: Path, file_filter) -> Iterator[Path]:
-    """Internal helper to walk files with a given filter."""
-    ignore_filter = IgnoreFilter.from_root(root)
-    dirs_to_visit = [root]
-
-    while dirs_to_visit:
-        current_dir = dirs_to_visit.pop(0)
-
-        if current_dir != root and ignore_filter.is_ignored(current_dir):
-            continue
-
-        try:
-            for item in current_dir.iterdir():
-                if ignore_filter.is_ignored(item):
-                    continue
-
-                if item.is_dir():
-                    dirs_to_visit.append(item)
-                elif item.is_file() and file_filter(item):
-                    yield item
-        except OSError:
-            # Ignore permission errors etc.
-            pass
-
-
-def walk_text_files(root: Path) -> Iterator[Path]:
-    """Walks a directory and yields all non-ignored text files.
-
-    This function respects .gitignore and .mcpignore files in the root
-    directory and will not descend into ignored directories.
-
-    Args:
-        root: The root directory to start walking from.
-
-    Yields:
-        Paths to text files that are not ignored.
-    """
-    # A simple heuristic for text files. Can be expanded.
-    TEXT_FILE_EXTENSIONS = {".py", ".txt", ".md", ".json", ".yaml", ".yml", ".xml", ".html", ".css", ".js", ".ts", ".jsx", ".tsx", ".java", ".c", ".cpp", ".h", ".hpp", ".go", ".rs", ".toml", ".ini", ".cfg"}
+    TEXT_FILE_EXTENSIONS = {
+        ".py", ".txt", ".md", ".json", ".yaml", ".yml", ".xml", ".html",
+        ".css", ".js", ".ts", ".jsx", ".tsx", ".java", ".c", ".cpp", ".h",
+        ".hpp", ".go", ".rs", ".toml", ".ini", ".cfg"
+    }
     yield from _walk_files(root, lambda p: p.suffix in TEXT_FILE_EXTENSIONS)
 
 

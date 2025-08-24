@@ -33,34 +33,13 @@ class SearchTextTool(Tool):
     def description(self) -> str:
         return "Performs a regular expression search over the files in the project."
 
-    @property
-    def schema(self) -> Dict[str, Any]:
-        return {
-            "type": "object",
-            "properties": {
-                "pattern": {
-                    "type": "string",
-                    "description": "The regular expression pattern to search for.",
-                },
-                "includeGlobs": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Glob patterns for files to include.",
-                },
-                "excludeGlobs": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Glob patterns for files to exclude.",
-                },
-            },
-            "required": ["pattern"],
-        }
-
-    async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
-        pattern = kwargs["pattern"]
-        includeGlobs = kwargs.get("includeGlobs")
-        excludeGlobs = kwargs.get("excludeGlobs")
-
+    async def handle(
+        self,
+        context: ToolContext,
+        pattern: str,
+        includeGlobs: Optional[List[str]] = None,
+        excludeGlobs: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
         matches: List[Match] = []
         try:
             regex = re.compile(pattern)

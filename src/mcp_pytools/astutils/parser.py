@@ -60,11 +60,17 @@ def get_node_at_position(tree: ast.AST, position: Position) -> Optional[ast.AST]
             if (
                 node_range.start.line <= position.line <= node_range.end.line
                 and (
-                    (node_range.start.line == position.line and position.column >= node_range.start.column)
+                    (
+                        node_range.start.line == position.line
+                        and position.column >= node_range.start.column
+                    )
                     or node_range.start.line < position.line
                 )
                 and (
-                    (node_range.end.line == position.line and position.column <= node_range.end.column)
+                    (
+                        node_range.end.line == position.line
+                        and position.column <= node_range.end.column
+                    )
                     or node_range.end.line > position.line
                 )
             ):

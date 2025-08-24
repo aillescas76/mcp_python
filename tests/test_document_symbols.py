@@ -1,9 +1,12 @@
 from pathlib import Path
+
 import pytest
+
+from mcp_pytools.analysis.symbols import Symbol, SymbolKind
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.document_symbols import DocumentSymbolsTool
-from mcp_pytools.analysis.symbols import Symbol, SymbolKind
 from mcp_pytools.tools.tool import ToolContext
+
 
 class MockToolContext(ToolContext):
     def __init__(self, index: ProjectIndex):
@@ -38,7 +41,13 @@ async def test_document_symbols_tool(doc_symbols_project: Path):
 
     module_uri = (root / "test_module.py").as_uri()
     symbols_data = await tool.handle(context, uri=module_uri)
-    symbols = [Symbol(kind=SymbolKind[s["kind"]], **{k: v for k, v in s.items() if k != "kind"}) for s in symbols_data]
+    symbols = [
+        Symbol(
+            kind=SymbolKind[s["kind"]],
+            **{k: v for k, v in s.items() if k != "kind"},
+        )
+        for s in symbols_data
+    ]
 
 
     assert len(symbols) == 4 # MyClass, my_method, my_function, x
