@@ -1,3 +1,4 @@
+import argparse
 from inspect import Parameter, Signature
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -9,8 +10,6 @@ from mcp_pytools.tools import tool_registry
 from mcp_pytools.tools.tool import Tool, ToolContext
 
 mcp = FastMCP("Python Code Tools")
-
-PROJECT_ROOT = Path("/home/aic/code/mcp_python")
 
 JSON_SCHEMA_TO_PYTHON_TYPE = {
     "string": str,
@@ -89,7 +88,18 @@ def main():
     """
     Main entry point for the MCP server.
     """
-    context = ServerContext(PROJECT_ROOT)
+    parser = argparse.ArgumentParser(description="MCP Python Tools Server")
+    parser.add_argument(
+        "project_root",
+        nargs="?",
+        default=".",
+        help="The root directory of the Python project.",
+    )
+    args = parser.parse_args()
+
+    project_root = Path(args.project_root).resolve()
+
+    context = ServerContext(project_root)
     context.build_index()
 
     # Discover and register all tools with FastMCP
