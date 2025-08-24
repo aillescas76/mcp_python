@@ -1,7 +1,8 @@
 from pathlib import Path
 import pytest
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.mutability_check import mutability_check_tool
+from mcp_pytools.tools.mutability_check import MutabilityCheckTool
+from .helpers import MockToolContext
 
 @pytest.fixture
 def mutability_check_project(tmp_path: Path) -> Path:
@@ -27,14 +28,16 @@ class MyClass:
     )
     return tmp_path
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_mutability_check(mutability_check_project: Path):
     root = mutability_check_project
     indexer = ProjectIndex(root)
     indexer.build()
+    context = MockToolContext(indexer)
+    tool = MutabilityCheckTool()
 
     module_uri = (root / "module_with_mutables.py").as_uri()
-    diagnostics = await mutability_check_tool(indexer, module_uri)
+    diagnostics = await tool.handle(context, uri=module_uri)
 
     assert len(diagnostics) == 4
     messages = {d['message'] for d in diagnostics}

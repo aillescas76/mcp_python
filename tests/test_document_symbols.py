@@ -1,10 +1,17 @@
-# tests/test_document_symbols.py
-
 from pathlib import Path
 import pytest
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.document_symbols import document_symbols_tool
+from mcp_pytools.tools.document_symbols import DocumentSymbolsTool
 from mcp_pytools.analysis.symbols import Symbol, SymbolKind
+from mcp_pytools.tools.tool import ToolContext
+
+class MockToolContext(ToolContext):
+    def __init__(self, index: ProjectIndex):
+        self._project_index = index
+
+    @property
+    def project_index(self) -> ProjectIndex:
+        return self._project_index
 
 @pytest.fixture
 def doc_symbols_project(tmp_path: Path) -> Path:
@@ -21,14 +28,16 @@ def my_function():
     )
     return tmp_path
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_document_symbols_tool(doc_symbols_project: Path):
     root = doc_symbols_project
     indexer = ProjectIndex(root)
     indexer.build()
+    context = MockToolContext(indexer)
+    tool = DocumentSymbolsTool()
 
     module_uri = (root / "test_module.py").as_uri()
-    symbols_data = await document_symbols_tool(indexer, module_uri)
+    symbols_data = await tool.handle(context, uri=module_uri)
     symbols = [Symbol(kind=SymbolKind[s["kind"]], **{k: v for k, v in s.items() if k != "kind"}) for s in symbols_data]
 
 

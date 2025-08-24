@@ -4,7 +4,7 @@ import dataclasses
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ..index.project import ProjectIndex
+from .tool import Tool, ToolContext
 
 
 @dataclasses.dataclass
@@ -31,45 +31,92 @@ def _module_name_from_uri(uri: str, root: Path) -> str:
         return Path(uri).stem
 
 
-async def import_graph_tool(
-    index: ProjectIndex, moduleUri: str
-) -> Dict[str, List[str]]:
-    """Handles an import graph request.
+class ImportGraphTool(Tool):
+    """A tool that provides the import graph for a module."""
 
-    This tool provides the list of modules imported by the given module, and
-    the list of modules that import the given module (dependents).
+    @property
+    def name(self) -> str:
+        return "import_graph"
 
-    Note: Module resolution is simplified and may not correctly handle
-    complex relative imports or namespace packages.
+    @property
+    def description(self) -> str:
+        return "Shows a module's direct imports and its dependents (reverse imports)."
 
-    Args:
-        index: The project index.
-        moduleUri: The URI of the module to query.
+    @property
+    def schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {
+                "moduleUri": {
+                    "type": "string",
+                    "description": "The URI of the module to query.",
+                }
+            },
+            "required": ["moduleUri"],
+        }
 
-    Returns:
-        A dictionary with 'imports' and 'dependents' lists,
-        containing URIs of other modules.
-    """
-    imports = index.imports.get(moduleUri, [])
-    import_names = sorted([edge.target_module for edge in imports])
+    async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, List[str]]:
+        """Handles an import graph request."""
+        moduleUri = kwargs["moduleUri"]
+        index = context.project_index
+        imports = index.imports.get(moduleUri, [])
 
-    # Build reverse import graph
-    dependents: List[str] = []
-    
-    # Get the module name for the given URI
-    current_module_name = _module_name_from_uri(moduleUri, index.root)
+        resolved_imports = []
+        for edge in imports:
+            if not edge.is_relative:
+                resolved_imports.append(edge.target_module)
+                continue
 
-    for uri, edges in index.imports.items():
-        if uri == moduleUri:
-            continue
-        for edge in edges:
-            # This is a simplified resolution for now
-            if current_module_name in edge.imported_name:
-                dependents.append(uri)
-                break # next module
+            # Simple relative import resolution
+            source_path = Path(moduleUri.replace("file://", ""))
+            level = 0
+            for char in edge.target_module:
+                if char == ".":
+                    level += 1
+                else:
+                    break
 
-    result = ImportGraphResult(
-        imports=import_names,
-        dependents=sorted(list(set(dependents))),
-    )
-    return result.to_dict()
+            base_path = source_path.parent
+            for _ in range(level - 1):
+                base_path = base_path.parent
+
+            module_part = edge.target_module[level:]
+            if module_part:
+                resolved_path = (base_path / module_part).resolve()
+            else:
+                resolved_path = base_path.resolve()
+
+            try:
+                relative_to_root = resolved_path.relative_to(index.root.resolve())
+                parts = list(relative_to_root.parts)
+                if parts[-1] == "__init__.py":
+                    parts.pop()
+
+                resolved_imports.append(".".join(parts))
+            except ValueError:
+                # Could not make relative to root, just use the module name
+                resolved_imports.append(module_part)
+
+
+        import_names = sorted(resolved_imports)
+
+        # Build reverse import graph
+        dependents: List[str] = []
+
+        # Get the module name for the given URI
+        current_module_name = _module_name_from_uri(moduleUri, index.root)
+
+        for uri, edges in index.imports.items():
+            if uri == moduleUri:
+                continue
+            for edge in edges:
+                # This is a simplified resolution for now
+                if current_module_name in edge.imported_name:
+                    dependents.append(uri)
+                    break  # next module
+
+        result = ImportGraphResult(
+            imports=import_names,
+            dependents=sorted(list(set(dependents))),
+        )
+        return result.to_dict()

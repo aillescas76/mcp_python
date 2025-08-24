@@ -1,8 +1,9 @@
 import ast
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from ..index.project import ProjectIndex
 from .diagnostics import Diagnostic, DiagnosticSeverity
+from .tool import Tool, ToolContext
+
 
 class MutabilityVisitor(ast.NodeVisitor):
     def __init__(self, uri: str):
@@ -37,16 +38,30 @@ class MutabilityVisitor(ast.NodeVisitor):
                     )
                 )
 
-async def mutability_check_tool(
-    index: ProjectIndex, uri: str
-) -> List[Dict[str, Any]]:
-    """
-    Checks for mutable default arguments in a Python module.
-    """
-    module = index.modules.get(uri)
-    if not module:
-        return []
 
-    visitor = MutabilityVisitor(uri)
-    visitor.visit(module.tree)
-    return [d.to_dict() for d in visitor.diagnostics]
+class MutabilityCheckTool(Tool):
+    @property
+    def name(self) -> str:
+        return "mutability_check"
+
+    @property
+    def description(self) -> str:
+        return "Checks for mutable default arguments in a Python module."
+
+    @property
+    def schema(self) -> Dict[str, Any]:
+        return {
+            "type": "object",
+            "properties": {"uri": {"type": "string"}},
+            "required": ["uri"],
+        }
+
+    async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
+        uri = kwargs["uri"]
+        module = context.project_index.modules.get(uri)
+        if not module:
+            return []
+
+        visitor = MutabilityVisitor(uri)
+        visitor.visit(module.tree)
+        return [d.to_dict() for d in visitor.diagnostics]

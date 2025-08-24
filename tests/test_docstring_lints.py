@@ -1,7 +1,16 @@
 from pathlib import Path
 import pytest
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.docstring_lints import docstring_lints_tool
+from mcp_pytools.tools.docstring_lints import DocstringLintsTool
+from mcp_pytools.tools.tool import ToolContext
+
+class MockToolContext(ToolContext):
+    def __init__(self, index: ProjectIndex):
+        self._project_index = index
+
+    @property
+    def project_index(self) -> ProjectIndex:
+        return self._project_index
 
 @pytest.fixture
 def docstring_lint_project(tmp_path: Path) -> Path:
@@ -31,14 +40,16 @@ class _PrivateClass:
     )
     return tmp_path
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_docstring_lints(docstring_lint_project: Path):
     root = docstring_lint_project
     indexer = ProjectIndex(root)
     indexer.build()
+    context = MockToolContext(indexer)
+    tool = DocstringLintsTool()
 
     module_uri = (root / "module_with_lints.py").as_uri()
-    diagnostics = await docstring_lints_tool(indexer, module_uri)
+    diagnostics = await tool.handle(context, uri=module_uri)
 
     assert len(diagnostics) == 6
     messages = {d['message'] for d in diagnostics}
@@ -49,14 +60,16 @@ async def test_docstring_lints(docstring_lint_project: Path):
     assert "Missing docstring for '_PrivateClass'" in messages
     assert "Missing docstring for '_private_method_without_docstring'" in messages
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_docstring_lints_ignore_private(docstring_lint_project: Path):
     root = docstring_lint_project
     indexer = ProjectIndex(root)
     indexer.build()
+    context = MockToolContext(indexer)
+    tool = DocstringLintsTool()
 
     module_uri = (root / "module_with_lints.py").as_uri()
-    diagnostics = await docstring_lints_tool(indexer, module_uri, ignore_private=True)
+    diagnostics = await tool.handle(context, uri=module_uri, ignore_private=True)
 
     assert len(diagnostics) == 4
     messages = {d['message'] for d in diagnostics}
