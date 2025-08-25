@@ -280,3 +280,39 @@ async def test_rename_symbol_across_modules(rename_project: Path):
     # Verify reference in another file is modified
     assert "new_function_name" in (root / "module2.py").read_text()
     assert "my_function" not in (root / "module2.py").read_text()
+
+
+@pytest.mark.anyio
+async def test_rename_symbol_preserves_formatting(tmp_path: Path):
+    root = tmp_path
+    file_content = (
+        "# This is a comment\n"
+        "def my_function(): # This is another comment\n"
+        "    a = 'hello'\n"
+        '    b = "world"\n'
+        "    print(my_function)\n"
+    )
+    expected_content = (
+        "# This is a comment\n"
+        "def new_function(): # This is another comment\n"
+        "    a = 'hello'\n"
+        '    b = "world"\n'
+        "    print(new_function)\n"
+    )
+    (root / "module.py").write_text(file_content)
+    (root / "__init__.py").write_text("")
+
+    indexer = ProjectIndex(root)
+    indexer.build()
+    context = MockToolContext(indexer)
+    tool = RenameSymbolTool()
+
+    file_path = str(root / "module.py")
+    old_symbol = "my_function"
+    new_symbol = "new_function"
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
+
+    assert result.get("status") == "ok"
+    assert (root / "module.py").read_text() == expected_content

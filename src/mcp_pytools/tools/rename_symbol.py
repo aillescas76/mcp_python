@@ -1,45 +1,8 @@
-import ast
+from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict
-
-import astunparse
+from typing import Any, Dict, List
 
 from .tool import Tool, ToolContext
-
-
-class RenameTransformer(ast.NodeTransformer):
-    def __init__(self, old_name: str, new_name: str):
-        self.old_name = old_name
-        self.new_name = new_name
-
-    def visit_Name(self, node: ast.Name) -> ast.Name:
-        if node.id == self.old_name:
-            node.id = self.new_name
-        return node
-
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> ast.FunctionDef:
-        if node.name == self.old_name:
-            node.name = self.new_name
-        self.generic_visit(node)
-        return node
-
-    def visit_ClassDef(self, node: ast.ClassDef) -> ast.ClassDef:
-        if node.name == self.old_name:
-            node.name = self.new_name
-        self.generic_visit(node)
-        return node
-
-    def visit_arg(self, node: ast.arg) -> ast.arg:
-        if node.arg == self.old_name:
-            node.arg = self.new_name
-        self.generic_visit(node)
-        return node
-
-    def visit_alias(self, node: ast.alias) -> ast.alias:
-        if node.name == self.old_name:
-            node.name = self.new_name
-        self.generic_visit(node)
-        return node
 
 
 class RenameSymbolTool(Tool):
@@ -82,24 +45,36 @@ class RenameSymbolTool(Tool):
             return {"status": "ok", "references": references}
 
         modified_files = set()
+        grouped_references = defaultdict(list)
         for ref in references:
-            file_path = ref["uri"].replace("file://", "")
+            grouped_references[ref["uri"]].append(ref)
+
+        for file_uri, refs in grouped_references.items():
+            file_path = file_uri.replace("file://", "")
             path = Path(file_path)
             if not path.is_file():
                 continue
 
-            original_content = path.read_text()
-            tree = ast.parse(original_content)
+            content = path.read_text()
+            lines = content.splitlines(True)
 
-            transformer = RenameTransformer(old_name, new_name)
-            new_tree = transformer.visit(tree)
-            ast.fix_missing_locations(new_tree)
+            # Sort refs by line and column in reverse order
+            refs.sort(key=lambda r: (r["range"]["start"]["line"], r["range"]["start"]["column"]), reverse=True)
 
-            modified_content = astunparse.unparse(new_tree)
+            for ref in refs:
+                line_num = ref["range"]["start"]["line"]
+                start_char = ref["range"]["start"]["column"]
+
+                line = lines[line_num]
+                # The range from find_references can be broad. Find the exact position.
+                actual_start = line.find(old_name, start_char)
+                if actual_start != -1:
+                    end_char = actual_start + len(old_name)
+                    lines[line_num] = line[:actual_start] + new_name + line[end_char:]
+
+            modified_content = "".join(lines)
             path.write_text(modified_content)
             modified_files.add(str(path))
-
-        for file_path in modified_files:
-            context.project_index.file_cache.invalidate(Path(file_path))
+            context.project_index.file_cache.invalidate(path)
 
         return {"status": "ok", "modified_files": list(modified_files)}
