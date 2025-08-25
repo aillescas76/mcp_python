@@ -103,3 +103,6 @@ Privacy: Do not log any user-provided task content or personally identifiable in
 Security: All API endpoints that modify data must be protected by authentication and authorization logic. All user input must be validated using Pydantic models to prevent injection attacks.
 
 </NON_NEGOTIABLE_CONSTRAINTS>
+<CONTEXT_GENERATION_RULES>
+Use python-code-tools to construct the context instead of read whole files. Just get the code for the methods that you need and only read the files that you need to edit. If you can do the edit just with the information got by python-code-tools, use it.
+</CONTEXT_GENERATION_RULES>

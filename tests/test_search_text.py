@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.search_text import SearchTextTool, Match
+from mcp_pytools.tools.search_text import Match, SearchTextTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def search_text_project(tmp_path: Path) -> Path:

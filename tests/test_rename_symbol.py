@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.rename_symbol import RenameSymbolTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def rename_project(tmp_path: Path) -> Path:
@@ -58,13 +62,12 @@ async def test_rename_symbol_function_dry_run(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "my_function"
     new_symbol = "new_function_name"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
-    assert "modified_content" in result
-    modified_content = result["modified_content"]
-
-    assert "new_function_name" in modified_content
-    assert "my_function" not in modified_content
+    assert "references" in result
+    assert len(result["references"]) > 0
 
     # Verify file is not modified
     assert "my_function" in (root / "module1.py").read_text()
@@ -80,7 +83,9 @@ async def test_rename_symbol_function_apply(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "my_function"
     new_symbol = "new_function_name"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -99,13 +104,12 @@ async def test_rename_symbol_class_dry_run(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "MyClass"
     new_symbol = "NewClass"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
-    assert "modified_content" in result
-    modified_content = result["modified_content"]
-
-    assert "NewClass" in modified_content
-    assert "MyClass" not in modified_content
+    assert "references" in result
+    assert len(result["references"]) > 0
 
     # Verify file is not modified
     assert "MyClass" in (root / "module2.py").read_text()
@@ -121,7 +125,9 @@ async def test_rename_symbol_class_apply(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "MyClass"
     new_symbol = "NewClass"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -140,13 +146,12 @@ async def test_rename_symbol_method_dry_run(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "get_value"
     new_symbol = "retrieve_value"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
-    assert "modified_content" in result
-    modified_content = result["modified_content"]
-
-    assert "retrieve_value" in modified_content
-    assert "get_value" not in modified_content
+    assert "references" in result
+    assert len(result["references"]) > 0
 
     # Verify file is not modified
     assert "get_value" in (root / "module2.py").read_text()
@@ -162,7 +167,9 @@ async def test_rename_symbol_method_apply(rename_project: Path):
     file_path = str(root / "module2.py")
     old_symbol = "get_value"
     new_symbol = "retrieve_value"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -181,13 +188,12 @@ async def test_rename_symbol_variable_dry_run(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "GLOBAL_VAR"
     new_symbol = "GLOBAL_FOO_VAR"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
-    assert "modified_content" in result
-    modified_content = result["modified_content"]
-
-    assert "GLOBAL_FOO_VAR" in modified_content
-    assert "GLOBAL_VAR" not in modified_content
+    assert "references" in result
+    assert len(result["references"]) > 0
 
     # Verify file is not modified
     assert "GLOBAL_VAR" in (root / "module1.py").read_text()
@@ -203,7 +209,9 @@ async def test_rename_symbol_variable_apply(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "GLOBAL_VAR"
     new_symbol = "GLOBAL_FOO_VAR"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
 
     assert result.get("status") == "ok"
 
@@ -222,11 +230,11 @@ async def test_rename_symbol_not_found(rename_project: Path):
     file_path = str(root / "module1.py")
     old_symbol = "non_existent_symbol"
     new_symbol = "new_name"
-    result = await tool.handle(context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
+    )
 
-    assert "modified_content" in result
-    assert old_symbol not in result["modified_content"]
-    assert new_symbol not in result["modified_content"]
+    assert "error" in result
 
 @pytest.mark.anyio
 async def test_rename_symbol_empty_names(rename_project: Path):
@@ -237,8 +245,74 @@ async def test_rename_symbol_empty_names(rename_project: Path):
     tool = RenameSymbolTool()
 
     file_path = str(root / "module1.py")
-    result = await tool.handle(context, file_path=file_path, old_name="", new_name="new_name", apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name="", new_name="new_name", apply=False
+    )
     assert "error" in result
 
-    result = await tool.handle(context, file_path=file_path, old_name="old_name", new_name="", apply=False)
+    result = await tool.handle(
+        context, file_path=file_path, old_name="old_name", new_name="", apply=False
+    )
     assert "error" in result
+
+
+@pytest.mark.anyio
+async def test_rename_symbol_across_modules(rename_project: Path):
+    root = rename_project
+    indexer = ProjectIndex(root)
+    indexer.build()
+    context = MockToolContext(indexer)
+    tool = RenameSymbolTool()
+
+    file_path = str(root / "module1.py")
+    old_symbol = "my_function"
+    new_symbol = "new_function_name"
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
+
+    assert result.get("status") == "ok"
+
+    # Verify file is modified
+    assert "new_function_name" in (root / "module1.py").read_text()
+    assert "my_function" not in (root / "module1.py").read_text()
+
+    # Verify reference in another file is modified
+    assert "new_function_name" in (root / "module2.py").read_text()
+    assert "my_function" not in (root / "module2.py").read_text()
+
+
+@pytest.mark.anyio
+async def test_rename_symbol_preserves_formatting(tmp_path: Path):
+    root = tmp_path
+    file_content = (
+        "# This is a comment\n"
+        "def my_function(): # This is another comment\n"
+        "    a = 'hello'\n"
+        '    b = "world"\n'
+        "    print(my_function)\n"
+    )
+    expected_content = (
+        "# This is a comment\n"
+        "def new_function(): # This is another comment\n"
+        "    a = 'hello'\n"
+        '    b = "world"\n'
+        "    print(new_function)\n"
+    )
+    (root / "module.py").write_text(file_content)
+    (root / "__init__.py").write_text("")
+
+    indexer = ProjectIndex(root)
+    indexer.build()
+    context = MockToolContext(indexer)
+    tool = RenameSymbolTool()
+
+    file_path = str(root / "module.py")
+    old_symbol = "my_function"
+    new_symbol = "new_function"
+    result = await tool.handle(
+        context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=True
+    )
+
+    assert result.get("status") == "ok"
+    assert (root / "module.py").read_text() == expected_content

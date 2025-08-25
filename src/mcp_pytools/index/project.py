@@ -5,11 +5,11 @@ import threading
 from pathlib import Path
 from typing import Dict, List
 
-from mcp_pytools.analysis.imports import import_edges, ImportEdge
-from mcp_pytools.analysis.symbols import document_symbols, Symbol
-from mcp_pytools.astutils.parser import ParsedModule, parse_module, StructuredSyntaxError
+from mcp_pytools.analysis.imports import ImportEdge, import_edges
+from mcp_pytools.analysis.symbols import Symbol, document_symbols
+from mcp_pytools.astutils.parser import ParsedModule, StructuredSyntaxError, parse_module
 from mcp_pytools.fs.cache import FileCache
-from mcp_pytools.fs.ignore import walk_python_files, walk_text_files
+from mcp_pytools.fs.ignore import walk_text_files
 
 
 @dataclasses.dataclass

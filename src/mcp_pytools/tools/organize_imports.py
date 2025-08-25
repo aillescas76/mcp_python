@@ -15,15 +15,29 @@ class OrganizeImportsTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Organizes imports in a Python module using ruff."
+        return (
+            "Sorts and formats import statements in a Python file according to PEP 8 "
+            "standards using the 'ruff' linter. It can either return a diff of the "
+            "changes or apply them directly to the file."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "uri": {"type": "string"},
-                "apply": {"type": "boolean", "default": False},
+                "uri": {
+                    "type": "string",
+                    "description": "The file URI of the Python module to organize imports for.",
+                },
+                "apply": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": (
+                        "If true, applies the changes directly to the file. If false, "
+                        "returns a diff of the proposed changes."
+                    ),
+                },
             },
             "required": ["uri"],
         }

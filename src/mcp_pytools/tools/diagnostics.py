@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 from ..astutils.parser import Range
 
+
 class DiagnosticSeverity(Enum):
     ERROR = 1
     WARNING = 2

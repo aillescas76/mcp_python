@@ -17,6 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "mcp[cli]",
+    "astunparse",
 ]
 
 [project.urls]
@@ -49,6 +50,3 @@ select = [
 
 [tool.ruff.format]
 quote-style = "double"
-
-[tool.scripts]
-test = "pytest"

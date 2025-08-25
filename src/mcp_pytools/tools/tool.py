@@ -22,6 +22,11 @@ class Tool(ABC):
         """The schema of the tool's input."""
         return {}
 
+    @property
+    def requires_index(self) -> bool:
+        """Whether the tool requires the project index to be built."""
+        return True
+
     @abstractmethod
     async def handle(self, **kwargs: Any) -> Any:
         """Executes the tool with the given arguments."""
@@ -33,4 +38,8 @@ class ToolContext(Protocol):
 
     @property
     def project_index(self) -> Any:
+        ...
+
+    @property
+    def tool_registry(self) -> Any:
         ...

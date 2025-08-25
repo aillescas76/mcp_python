@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
-from mcp_pytools.tools.import_graph import ImportGraphTool, ImportGraphResult
+from mcp_pytools.tools.import_graph import ImportGraphResult, ImportGraphTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def import_graph_project(tmp_path: Path) -> Path:

@@ -5,7 +5,7 @@ import dataclasses
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from mcp_pytools.astutils.parser import ParsedModule, Range, Position
+from mcp_pytools.astutils.parser import ParsedModule, Position, Range
 
 
 class SymbolKind(Enum):

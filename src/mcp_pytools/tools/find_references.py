@@ -1,6 +1,8 @@
-"""Tool to find all references to a symbol."""
+"""
+Tool to find all references to a symbol."""
 
 import ast
+from pathlib import Path
 from typing import Any, Dict, List
 
 from .find_definition import Location
@@ -22,6 +24,21 @@ class ReferenceVisitor(ast.NodeVisitor):
             self.references.append(node)
         self.generic_visit(node)
 
+    def visit_alias(self, node: ast.alias):
+        if node.name == self.name:
+            self.references.append(node)
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        if node.name == self.name:
+            self.references.append(node)
+        self.generic_visit(node)
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        if node.name == self.name:
+            self.references.append(node)
+        self.generic_visit(node)
+
 
 class FindReferencesTool(Tool):
     """A tool that finds all references to a symbol."""
@@ -32,7 +49,10 @@ class FindReferencesTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Finds all references to a symbol."
+        return (
+            "Finds all references to a symbol by its name across the entire project. "
+            "This is a simple, text-based search."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -41,7 +61,7 @@ class FindReferencesTool(Tool):
             "properties": {
                 "symbol": {
                     "type": "string",
-                    "description": "The symbol to find references for.",
+                    "description": "The name of the symbol to find references for.",
                 }
             },
             "required": ["symbol"],
@@ -61,6 +81,22 @@ class FindReferencesTool(Tool):
             visitor.visit(file_module.tree)
             for ref_node in visitor.references:
                 if hasattr(ref_node, "_range"):
-                    locations.append(Location(uri=file_uri, range=ref_node._range))
+                    file_path = Path(file_uri.replace("file://", ""))
+                    file_content = context.project_index.file_cache.get_text(file_path)
+                    lines = file_content.splitlines()
+                    start_line = ref_node._range.start.line
+                    end_line = ref_node._range.end.line
+                    start_col = ref_node._range.start.column
+                    end_col = ref_node._range.end.column
+
+                    if start_line == end_line:
+                        text = lines[start_line][start_col:end_col]
+                    else:
+                        text_lines = [lines[start_line][start_col:]]
+                        text_lines.extend(lines[start_line + 1:end_line])
+                        text_lines.append(lines[end_line][:end_col])
+                        text = "\n".join(text_lines)
+
+                    locations.append(Location(uri=file_uri, range=ref_node._range, text=text))
 
         return [loc.to_dict() for loc in locations]

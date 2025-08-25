@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.find_definition import FindDefinitionTool
-from .helpers import locations_from_data, MockToolContext
+
+from .helpers import MockToolContext, locations_from_data
+
 
 @pytest.fixture
 def find_def_project(tmp_path: Path) -> Path:
@@ -47,6 +51,7 @@ async def test_find_definition_tool_local_func(find_def_project: Path):
     assert location.uri == module_a_uri
     assert location.range.start.line == 5
     assert location.range.start.column == 4 # def top_level_func
+    assert location.text == "def top_level_func():\n    x = 10"
 
 @pytest.mark.anyio
 async def test_find_definition_tool_class(find_def_project: Path):
@@ -65,6 +70,7 @@ async def test_find_definition_tool_class(find_def_project: Path):
     assert location.uri == (root / "module_a.py").as_uri()
     assert location.range.start.line == 1
     assert location.range.start.column == 6 # class MyClass
+    assert location.text == "class MyClass:\n    def my_method(self):\n        pass"
 
 @pytest.mark.anyio
 async def test_find_definition_tool_method(find_def_project: Path):
@@ -83,6 +89,7 @@ async def test_find_definition_tool_method(find_def_project: Path):
     assert location.uri == (root / "module_a.py").as_uri()
     assert location.range.start.line == 2
     assert location.range.start.column == 8 # def my_method
+    assert location.text == "def my_method(self):\n        pass"
 
 @pytest.mark.anyio
 async def test_find_definition_tool_not_found(find_def_project: Path):

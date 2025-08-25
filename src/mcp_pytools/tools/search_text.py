@@ -3,7 +3,7 @@
 import dataclasses
 import fnmatch
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from ..astutils.parser import Position, Range
 from ..fs.ignore import walk_text_files
@@ -31,7 +31,11 @@ class SearchTextTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Performs a regular expression search over the files in the project."
+        return (
+            "Performs a case-sensitive regular expression search across all text files "
+            "in the project, respecting .gitignore rules. Returns a list of all "
+            "matching lines."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -40,17 +44,17 @@ class SearchTextTool(Tool):
             "properties": {
                 "pattern": {
                     "type": "string",
-                    "description": "The regular expression pattern to search for.",
+                    "description": "The Python-style regular expression to search for.",
                 },
                 "includeGlobs": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Glob patterns for files to include.",
+                    "description": "Optional list of glob patterns to include in the search.",
                 },
                 "excludeGlobs": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Glob patterns for files to exclude.",
+                    "description": "Optional list of glob patterns to exclude from the search.",
                 },
             },
             "required": ["pattern"],
@@ -65,12 +69,18 @@ class SearchTextTool(Tool):
         try:
             regex = re.compile(pattern)
         except re.error:
-            return []
+            return []  # Invalid regex, return no matches
 
         for path in walk_text_files(context.project_index.root):
-            if excludeGlobs:
-                if any(fnmatch.fnmatch(path.name, glob) for glob in excludeGlobs):
-                    continue
+            # Filtering based on includeGlobs and excludeGlobs
+            if includeGlobs and not any(
+                fnmatch.fnmatch(str(path), glob) for glob in includeGlobs
+            ):
+                continue
+            if excludeGlobs and any(
+                fnmatch.fnmatch(str(path), glob) for glob in excludeGlobs
+            ):
+                continue
 
             uri = path.as_uri()
             try:
@@ -85,6 +95,7 @@ class SearchTextTool(Tool):
                             Match(uri=uri, range=match_range, line=line_text)
                         )
             except Exception:
+                # Ignore files that can't be read
                 continue
 
         return [m.to_dict() for m in matches]

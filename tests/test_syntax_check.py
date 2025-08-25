@@ -1,8 +1,12 @@
 from pathlib import Path
+
 import pytest
+
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.syntax_check import SyntaxCheckTool
+
 from .helpers import MockToolContext
+
 
 @pytest.fixture
 def syntax_check_project(tmp_path: Path) -> Path:

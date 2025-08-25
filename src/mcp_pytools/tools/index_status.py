@@ -8,15 +8,20 @@ class IndexStatusTool(Tool):
 
     @property
     def name(self) -> str:
-        return "index.status"
+        return "index_status"
 
     @property
     def description(self) -> str:
         return "Gets the status of the project index."
 
+    @property
+    def requires_index(self) -> bool:
+        return False
+
     async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, Any]:
         """Gets the status of the project index."""
+        stats = context.project_index.stats
         return {
-            "indexed_files": len(context.project_index.modules),
-            "parse_errors": len(context.project_index.parse_errors),
+            "indexed_files": stats.files_indexed,
+            "parse_errors": stats.parse_errors,
         }

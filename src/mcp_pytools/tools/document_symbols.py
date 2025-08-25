@@ -15,14 +15,21 @@ class DocumentSymbolsTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Provides a document symbol outline for a given file."
+        return (
+            "Lists all symbols (classes, functions, methods, etc.) in a given Python "
+            "file. This is useful for getting a high-level overview of a file's "
+            "structure and contents."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "uri": {"type": "string", "description": "The URI of the document to analyze."}
+                "uri": {
+                    "type": "string",
+                    "description": "The file URI of the Python module to analyze.",
+                }
             },
             "required": ["uri"],
         }
