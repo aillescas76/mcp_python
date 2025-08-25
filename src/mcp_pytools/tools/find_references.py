@@ -24,6 +24,21 @@ class ReferenceVisitor(ast.NodeVisitor):
             self.references.append(node)
         self.generic_visit(node)
 
+    def visit_alias(self, node: ast.alias):
+        if node.name == self.name:
+            self.references.append(node)
+        self.generic_visit(node)
+
+    def visit_FunctionDef(self, node: ast.FunctionDef):
+        if node.name == self.name:
+            self.references.append(node)
+        self.generic_visit(node)
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        if node.name == self.name:
+            self.references.append(node)
+        self.generic_visit(node)
+
 
 class FindReferencesTool(Tool):
     """A tool that finds all references to a symbol."""

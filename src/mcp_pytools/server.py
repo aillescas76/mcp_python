@@ -22,15 +22,23 @@ JSON_SCHEMA_TO_PYTHON_TYPE = {
 }
 
 
+from mcp_pytools.tools.registry import ToolRegistry
+
+
 class ServerContext(ToolContext):
     def __init__(self, project_root: Path):
         self._project_root = project_root
         self._project_index = ProjectIndex(project_root)
         self._index_ready = threading.Event()
+        self._tool_registry = tool_registry
 
     @property
     def project_index(self) -> ProjectIndex:
         return self._project_index
+
+    @property
+    def tool_registry(self) -> "ToolRegistry":
+        return self._tool_registry
 
     def build_index(self):
         def build():

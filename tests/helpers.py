@@ -6,13 +6,23 @@ from mcp_pytools.tools.find_definition import Location
 from mcp_pytools.tools.tool import ToolContext
 
 
+from mcp_pytools.tools.registry import ToolRegistry
+
+
 class MockToolContext(ToolContext):
     def __init__(self, index: ProjectIndex):
         self._project_index = index
+        self._tool_registry = ToolRegistry()
+        self._tool_registry.discover_tools(__import__("mcp_pytools.tools", fromlist=[""]))
+
 
     @property
     def project_index(self) -> ProjectIndex:
         return self._project_index
+
+    @property
+    def tool_registry(self) -> "ToolRegistry":
+        return self._tool_registry
 
 def locations_from_data(locations_data: List[Dict[str, Any]]) -> List[Location]:
     locations = []

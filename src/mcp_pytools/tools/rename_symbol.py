@@ -35,6 +35,12 @@ class RenameTransformer(ast.NodeTransformer):
         self.generic_visit(node)
         return node
 
+    def visit_alias(self, node: ast.alias) -> ast.alias:
+        if node.name == self.old_name:
+            node.name = self.new_name
+        self.generic_visit(node)
+        return node
+
 
 class RenameSymbolTool(Tool):
     @property
@@ -59,7 +65,6 @@ class RenameSymbolTool(Tool):
         }
 
     async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, Any]:
-        file_path = kwargs["file_path"]
         old_name = kwargs["old_name"]
         new_name = kwargs["new_name"]
         apply = kwargs.get("apply", False)
@@ -67,22 +72,34 @@ class RenameSymbolTool(Tool):
         if not old_name or not new_name:
             return {"error": "Old symbol name and new name cannot be empty."}
 
-        path = Path(file_path)
-        if not path.is_file():
-            return {"error": f"File not found: {file_path}"}
+        find_references_tool = context.tool_registry.get_tool("find_references")
+        references = await find_references_tool.handle(context, symbol=old_name)
 
-        original_content = path.read_text()
-        tree = ast.parse(original_content)
+        if not references:
+            return {"error": f"No references found for symbol: {old_name}"}
 
-        transformer = RenameTransformer(old_name, new_name)
-        new_tree = transformer.visit(tree)
-        ast.fix_missing_locations(new_tree)
+        if not apply:
+            return {"status": "ok", "references": references}
 
-        modified_content = astunparse.unparse(new_tree)
+        modified_files = set()
+        for ref in references:
+            file_path = ref["uri"].replace("file://", "")
+            path = Path(file_path)
+            if not path.is_file():
+                continue
 
-        if apply:
+            original_content = path.read_text()
+            tree = ast.parse(original_content)
+
+            transformer = RenameTransformer(old_name, new_name)
+            new_tree = transformer.visit(tree)
+            ast.fix_missing_locations(new_tree)
+
+            modified_content = astunparse.unparse(new_tree)
             path.write_text(modified_content)
-            context.project_index.file_cache.invalidate(path)
-            return {"status": "ok"}
-        else:
-            return {"modified_content": modified_content}
+            modified_files.add(str(path))
+
+        for file_path in modified_files:
+            context.project_index.file_cache.invalidate(Path(file_path))
+
+        return {"status": "ok", "modified_files": list(modified_files)}
