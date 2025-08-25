@@ -19,10 +19,23 @@ class RenameSymbolTool(Tool):
         return {
             "type": "object",
             "properties": {
-                "file_path": {"type": "string"},
-                "old_name": {"type": "string"},
-                "new_name": {"type": "string"},
-                "apply": {"type": "boolean", "default": False},
+                "file_path": {
+                    "type": "string",
+                    "description": "The path to the file where the rename originates.",
+                },
+                "old_name": {
+                    "type": "string",
+                    "description": "The symbol name to be replaced.",
+                },
+                "new_name": {
+                    "type": "string",
+                    "description": "The new name for the symbol.",
+                },
+                "apply": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "If true, applies the changes directly to the files. If false, returns a list of references that would be changed.",
+                },
             },
             "required": ["file_path", "old_name", "new_name"],
         }

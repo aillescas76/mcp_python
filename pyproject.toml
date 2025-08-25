@@ -17,6 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "mcp[cli]",
+    "astunparse",
 ]
 
 [project.urls]

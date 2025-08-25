@@ -71,15 +71,22 @@ class DocstringLintsTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Checks for missing docstrings in a Python module."
+        return "Lints a Python file to find missing docstrings in modules, classes, and functions, reporting them as diagnostics. This helps enforce documentation standards."
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "uri": {"type": "string"},
-                "ignore_private": {"type": "boolean", "default": False},
+                "uri": {
+                    "type": "string",
+                    "description": "The file URI of the Python module to check.",
+                },
+                "ignore_private": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "If true, functions and classes starting with an underscore will be ignored.",
+                },
             },
             "required": ["uri"],
         }

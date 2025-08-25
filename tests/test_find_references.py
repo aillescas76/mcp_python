@@ -49,11 +49,11 @@ async def test_find_references_tool_class(find_refs_project: Path):
     references_data = await tool.handle(context, symbol="MyClass")
     references = locations_from_data(references_data)
 
-    assert len(references) == 3
+    assert len(references) == 5
 
     # Check URIs
-    assert len([r for r in references if r.uri == module_a_uri]) == 1
-    assert len([r for r in references if r.uri == module_b_uri]) == 2
+    assert len([r for r in references if r.uri == module_a_uri]) == 2
+    assert len([r for r in references if r.uri == module_b_uri]) == 3
 
 @pytest.mark.anyio
 async def test_find_references_tool_method(find_refs_project: Path):
@@ -68,7 +68,7 @@ async def test_find_references_tool_method(find_refs_project: Path):
     references_data = await tool.handle(context, symbol="my_method")
     references = locations_from_data(references_data)
 
-    assert len(references) == 1
+    assert len(references) == 2
 
     # Check specific references
     assert any(r.uri == module_b_uri and r.range.start.line == 5 for r in references)

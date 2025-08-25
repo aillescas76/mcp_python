@@ -49,7 +49,7 @@ class FindReferencesTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Finds all references to a symbol."
+        return "Finds all references to a symbol by its name across the entire project. This is a simple, text-based search."
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -58,7 +58,7 @@ class FindReferencesTool(Tool):
             "properties": {
                 "symbol": {
                     "type": "string",
-                    "description": "The symbol to find references for.",
+                    "description": "The name of the symbol to find references for.",
                 }
             },
             "required": ["symbol"],

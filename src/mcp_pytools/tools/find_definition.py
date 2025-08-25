@@ -26,14 +26,17 @@ class FindDefinitionTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Finds the definition of a symbol."
+        return "Finds the definition of a symbol by its name, searching across the entire project. This is a custom implementation that performs a project-wide search."
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "symbol": {"type": "string", "description": "The symbol to find."}
+                "symbol": {
+                    "type": "string",
+                    "description": "The name of the symbol to find the definition for.",
+                }
             },
             "required": ["symbol"],
         }
