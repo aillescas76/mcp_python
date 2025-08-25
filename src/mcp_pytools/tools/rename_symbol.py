@@ -49,7 +49,7 @@ class RenameSymbolTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Renames a symbol and all its references across the project. Note: This is a simple text-based rename and may not be safe for complex refactoring."
+        return "Renames a symbol and all its references across the project."
 
     @property
     def schema(self) -> Dict[str, Any]:
