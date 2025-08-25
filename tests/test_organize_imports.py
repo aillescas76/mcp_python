@@ -69,7 +69,9 @@ async def test_organize_imports_dry_run(organize_imports_project: Path):
 
     # We need to handle the fact that the path in the diff is relative
     # and the header might be different. We'll check the core part of the diff.
-    assert expected_diff.split("@@", 2)[2] in result["diff"]
+    actual_diff_lines = result["diff"].splitlines()
+    expected_diff_lines = expected_diff.splitlines()
+    assert actual_diff_lines[2:] == expected_diff_lines[3:]
 
     # Check that the file is not modified
     original_content = (root / "module_to_organize.py").read_text()
