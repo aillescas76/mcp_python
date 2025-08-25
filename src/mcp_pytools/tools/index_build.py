@@ -8,7 +8,7 @@ class IndexBuildTool(Tool):
 
     @property
     def name(self) -> str:
-        return "index.build"
+        return "index_build"
 
     @property
     def description(self) -> str:
