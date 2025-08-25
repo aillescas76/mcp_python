@@ -34,7 +34,10 @@ class RenameSymbolTool(Tool):
                 "apply": {
                     "type": "boolean",
                     "default": False,
-                    "description": "If true, applies the changes directly to the files. If false, returns a list of references that would be changed.",
+                    "description": (
+                        "If true, applies the changes directly to the files. If false, "
+                        "returns a list of references that would be changed."
+                    ),
                 },
             },
             "required": ["file_path", "old_name", "new_name"],

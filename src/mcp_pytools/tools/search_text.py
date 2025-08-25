@@ -3,7 +3,7 @@
 import dataclasses
 import fnmatch
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from ..astutils.parser import Position, Range
 from ..fs.ignore import walk_text_files
@@ -31,7 +31,11 @@ class SearchTextTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Performs a case-sensitive regular expression search across all text files in the project, respecting .gitignore rules. Returns a list of all matching lines."
+        return (
+            "Performs a case-sensitive regular expression search across all text files "
+            "in the project, respecting .gitignore rules. Returns a list of all "
+            "matching lines."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:

@@ -49,24 +49,6 @@ async def test_organize_imports_dry_run(organize_imports_project: Path):
 
     assert "diff" in result
     assert result["diff"]
-    # Expected diff for import reordering
-    expected_diff_part = """
---- a/{path}
-+++ b/{path}
-@@ -1,8 +1,8 @@
-+import json
- import os
- import sys
-+from collections import defaultdict
-
--from collections import defaultdict
--import json
-
- def my_func():
-     pass
-"""
-    expected_diff = expected_diff_part.format(path="module_to_organize.py")
-
     # Check for the key changes in the diff, which is more robust than an exact string match.
     diff_text = result["diff"]
     assert "+import json" in diff_text

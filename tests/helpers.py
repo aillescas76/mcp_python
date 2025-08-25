@@ -3,10 +3,8 @@ from typing import Any, Dict, List
 from mcp_pytools.astutils.parser import Position, Range
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools.find_definition import Location
-from mcp_pytools.tools.tool import ToolContext
-
-
 from mcp_pytools.tools.registry import ToolRegistry
+from mcp_pytools.tools.tool import ToolContext
 
 
 class MockToolContext(ToolContext):

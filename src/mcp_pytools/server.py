@@ -8,6 +8,7 @@ from mcp.server.fastmcp import FastMCP
 
 from mcp_pytools.index.project import ProjectIndex
 from mcp_pytools.tools import tool_registry
+from mcp_pytools.tools.registry import ToolRegistry
 from mcp_pytools.tools.tool import Tool, ToolContext
 
 mcp = FastMCP("Python Code Tools")
@@ -20,9 +21,6 @@ JSON_SCHEMA_TO_PYTHON_TYPE = {
     "array": list,
     "object": dict,
 }
-
-
-from mcp_pytools.tools.registry import ToolRegistry
 
 
 class ServerContext(ToolContext):
