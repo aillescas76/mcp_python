@@ -19,10 +19,6 @@ class RenameSymbolTool(Tool):
         return {
             "type": "object",
             "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "The path to the file where the rename originates.",
-                },
                 "old_name": {
                     "type": "string",
                     "description": "The symbol name to be replaced.",
@@ -40,7 +36,7 @@ class RenameSymbolTool(Tool):
                     ),
                 },
             },
-            "required": ["file_path", "old_name", "new_name"],
+            "required": ["old_name", "new_name"],
         }
 
     async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, Any]:
