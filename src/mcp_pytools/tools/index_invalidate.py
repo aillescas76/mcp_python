@@ -8,7 +8,7 @@ class IndexInvalidateTool(Tool):
 
     @property
     def name(self) -> str:
-        return "index.invalidate"
+        return "index_invalidate"
 
     @property
     def description(self) -> str:

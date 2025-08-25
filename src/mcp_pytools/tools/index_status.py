@@ -8,7 +8,7 @@ class IndexStatusTool(Tool):
 
     @property
     def name(self) -> str:
-        return "index.status"
+        return "index_status"
 
     @property
     def description(self) -> str:
