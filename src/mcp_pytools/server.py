@@ -1,4 +1,5 @@
 import argparse
+import threading
 from inspect import Parameter, Signature
 from pathlib import Path
 from typing import Any, Optional
@@ -25,15 +26,27 @@ class ServerContext(ToolContext):
     def __init__(self, project_root: Path):
         self._project_root = project_root
         self._project_index = ProjectIndex(project_root)
+        self._index_ready = threading.Event()
 
     @property
     def project_index(self) -> ProjectIndex:
         return self._project_index
 
     def build_index(self):
-        print("Building project index...")
-        self._project_index.build()
-        print(f"Index built. {len(self._project_index.modules)} modules indexed.")
+        def build():
+            print("Building project index...")
+            self._project_index.build()
+            print(
+                f"Index built. {len(self._project_index.modules)} modules indexed."
+            )
+            self._index_ready.set()
+
+        thread = threading.Thread(target=build, daemon=True)
+        thread.start()
+
+    def ensure_index_ready(self):
+        """Blocks until the project index is ready."""
+        self._index_ready.wait()
 
 
 def create_tool_handler(tool: Tool, context: ServerContext):
@@ -41,6 +54,9 @@ def create_tool_handler(tool: Tool, context: ServerContext):
 
     async def handler(**kwargs):
         try:
+            if tool.requires_index:
+                context.ensure_index_ready()
+
             # Note: We assume the concrete tool's handle method accepts the context.
             return await tool.handle(context, **kwargs)
         except Exception as e:

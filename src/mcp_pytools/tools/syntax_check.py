@@ -22,6 +22,10 @@ class SyntaxCheckTool(Tool):
             "required": ["uri"],
         }
 
+    @property
+    def requires_index(self) -> bool:
+        return False
+
     async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
         uri = kwargs["uri"]
         diagnostics: List[Diagnostic] = []
