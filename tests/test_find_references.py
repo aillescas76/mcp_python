@@ -35,13 +35,8 @@ def another_func():
     )
     return tmp_path
 
-
 @pytest.mark.anyio
-async def test_find_references_tool(find_refs_project: Path):
-    """
-    This test is updated to reflect the new API.
-    Since the tool is stubbed out to return an empty list, we assert that the result is empty.
-    """
+async def test_find_references_tool_class(find_refs_project: Path):
     root = find_refs_project
     indexer = ProjectIndex(root)
     indexer.build()
@@ -49,30 +44,43 @@ async def test_find_references_tool(find_refs_project: Path):
     tool = FindReferencesTool()
 
     module_a_uri = (root / "module_a.py").as_uri()
+    module_b_uri = (root / "module_b.py").as_uri()
 
-    references_data = await tool.handle(
-        context, uri=module_a_uri, line=2, character=8
-    )
+    references_data = await tool.handle(context, symbol="MyClass")
     references = locations_from_data(references_data)
 
-    assert len(references) == 0
+    assert len(references) == 5
 
+    # Check URIs
+    assert len([r for r in references if r.uri == module_a_uri]) == 2
+    assert len([r for r in references if r.uri == module_b_uri]) == 3
+
+@pytest.mark.anyio
+async def test_find_references_tool_method(find_refs_project: Path):
+    root = find_refs_project
+    indexer = ProjectIndex(root)
+    indexer.build()
+    context = MockToolContext(indexer)
+    tool = FindReferencesTool()
+
+    module_b_uri = (root / "module_b.py").as_uri()
+
+    references_data = await tool.handle(context, symbol="my_method")
+    references = locations_from_data(references_data)
+
+    assert len(references) == 2
+
+    # Check specific references
+    assert any(r.uri == module_b_uri and r.range.start.line == 5 for r in references)
 
 @pytest.mark.anyio
 async def test_find_references_tool_not_found(find_refs_project: Path):
-    """
-    This test is updated to reflect the new API.
-    Since the tool is stubbed out to return an empty list, we assert that the result is empty.
-    """
     root = find_refs_project
     indexer = ProjectIndex(root)
     indexer.build()
     context = MockToolContext(indexer)
     tool = FindReferencesTool()
 
-    module_a_uri = (root / "module_a.py").as_uri()
-
-    references_data = await tool.handle(context, uri=module_a_uri, line=0, character=0)
-    references = locations_from_data(references_data)
+    references = await tool.handle(context, symbol="non_existent_symbol")
 
     assert len(references) == 0

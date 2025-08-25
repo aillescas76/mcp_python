@@ -49,50 +49,70 @@ class RenameSymbolTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Safely renames a symbol at a given position and all its references across the project. This is a powerful refactoring tool."
+        return "Renames a symbol and all its references across the project. Note: This is a simple text-based rename and may not be safe for complex refactoring."
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "uri": {
+                "file_path": {
                     "type": "string",
-                    "description": "The file URI of the document containing the symbol to rename.",
+                    "description": "The path to the file where the rename originates.",
                 },
-                "line": {
-                    "type": "integer",
-                    "description": "The line number of the symbol's position.",
-                },
-                "character": {
-                    "type": "integer",
-                    "description": "The character offset of the symbol's position.",
+                "old_name": {
+                    "type": "string",
+                    "description": "The symbol name to be replaced.",
                 },
                 "new_name": {
                     "type": "string",
                     "description": "The new name for the symbol.",
                 },
+                "apply": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "If true, applies the changes directly to the files. If false, returns a list of references that would be changed.",
+                },
             },
-            "required": ["uri", "line", "character", "new_name"],
+            "required": ["file_path", "old_name", "new_name"],
         }
 
     async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, Any]:
-        # TODO: This implementation is fundamentally incorrect and needs a complete
-        # rewrite. It was calling `find_references` with an outdated schema and
-        # its own renaming logic is a naive AST transformation that is not
-        # context-aware and therefore unsafe for real-world use.
-        # The schema has been updated to be correct, but the implementation
-        # below is placeholder and will not work as intended.
-        uri = kwargs["uri"]
-        line = kwargs["line"]
-        character = kwargs["character"]
+        old_name = kwargs["old_name"]
         new_name = kwargs["new_name"]
+        apply = kwargs.get("apply", False)
 
-        # Placeholder logic to avoid crashing. This does not work.
-        old_name = "placeholder_to_avoid_crash"
         if not old_name or not new_name:
             return {"error": "Old symbol name and new name cannot be empty."}
 
-        return {
-            "error": "The rename_symbol tool is not implemented correctly. See TODO in source code."
-        }
+        find_references_tool = context.tool_registry.get_tool("find_references")
+        references = await find_references_tool.handle(context, symbol=old_name)
+
+        if not references:
+            return {"error": f"No references found for symbol: {old_name}"}
+
+        if not apply:
+            return {"status": "ok", "references": references}
+
+        modified_files = set()
+        for ref in references:
+            file_path = ref["uri"].replace("file://", "")
+            path = Path(file_path)
+            if not path.is_file():
+                continue
+
+            original_content = path.read_text()
+            tree = ast.parse(original_content)
+
+            transformer = RenameTransformer(old_name, new_name)
+            new_tree = transformer.visit(tree)
+            ast.fix_missing_locations(new_tree)
+
+            modified_content = astunparse.unparse(new_tree)
+            path.write_text(modified_content)
+            modified_files.add(str(path))
+
+        for file_path in modified_files:
+            context.project_index.file_cache.invalidate(Path(file_path))
+
+        return {"status": "ok", "modified_files": list(modified_files)}

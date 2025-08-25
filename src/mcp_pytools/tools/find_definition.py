@@ -26,44 +26,31 @@ class FindDefinitionTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Finds the definition of a symbol at a given position in a file. This is useful for 'go to definition' functionality."
+        return "Finds the definition of a symbol by its name, searching across the entire project. This is a custom implementation that performs a project-wide search."
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "uri": {
+                "symbol": {
                     "type": "string",
-                    "description": "The file URI of the document containing the symbol.",
-                },
-                "line": {
-                    "type": "integer",
-                    "description": "The line number of the symbol's position.",
-                },
-                "character": {
-                    "type": "integer",
-                    "description": "The character offset of the symbol's position.",
-                },
+                    "description": "The name of the symbol to find the definition for.",
+                }
             },
-            "required": ["uri", "line", "character"],
+            "required": ["symbol"],
         }
 
     async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
         """Handles a find definition request for a given symbol."""
-        # TODO: The implementation of this tool is incorrect. It should use the
-        # line and character to find the symbol at that position, then find
-        # its definition. The current implementation searches by name project-wide.
-        symbol = kwargs.get("symbol", "foo")
+        symbol = kwargs["symbol"]
         locations: List[Location] = []
         if symbol in context.project_index.defs_by_name:
             for def_symbol in context.project_index.defs_by_name[symbol]:
                 for uri, symbols_in_doc in context.project_index.symbols.items():
                     if def_symbol in symbols_in_doc:
                         file_path = Path(uri.replace("file://", ""))
-                        file_content = context.project_index.file_cache.get_text(
-                            file_path
-                        )
+                        file_content = context.project_index.file_cache.get_text(file_path)
                         if file_content:
                             module = parse_module(file_content, uri)
                             for node in ast.walk(module.tree):
