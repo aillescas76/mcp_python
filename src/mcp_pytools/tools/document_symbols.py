@@ -15,7 +15,11 @@ class DocumentSymbolsTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Lists all symbols (classes, functions, methods, etc.) in a given Python file. This is useful for getting a high-level overview of a file's structure and contents."
+        return (
+            "Lists all symbols (classes, functions, methods, etc.) in a given Python "
+            "file. This is useful for getting a high-level overview of a file's "
+            "structure and contents."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:

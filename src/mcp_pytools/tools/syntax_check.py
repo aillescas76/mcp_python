@@ -12,7 +12,11 @@ class SyntaxCheckTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Analyzes a single Python file for syntax errors and reports them as diagnostics. This tool is useful for quickly validating the basic structure of a file without performing a full analysis."
+        return (
+            "Analyzes a single Python file for syntax errors and reports them as "
+            "diagnostics. This tool is useful for quickly validating the basic "
+            "structure of a file without performing a full analysis."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:

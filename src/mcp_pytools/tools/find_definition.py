@@ -26,7 +26,11 @@ class FindDefinitionTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Finds the definition of a symbol by its name, searching across the entire project. This is a custom implementation that performs a project-wide search."
+        return (
+            "Finds the definition of a symbol by its name, searching across the "
+            "entire project. This is a custom implementation that performs a "
+            "project-wide search."
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
