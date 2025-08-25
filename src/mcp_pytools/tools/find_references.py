@@ -49,51 +49,38 @@ class FindReferencesTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Finds all references to a symbol."
+        return "Finds all references to the symbol at a given position in a file. This is useful for understanding where a symbol is used throughout the project."
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
             "properties": {
-                "symbol": {
+                "uri": {
                     "type": "string",
-                    "description": "The symbol to find references for.",
-                }
+                    "description": "The file URI of the document containing the symbol.",
+                },
+                "line": {
+                    "type": "integer",
+                    "description": "The line number of the symbol's position.",
+                },
+                "character": {
+                    "type": "integer",
+                    "description": "The character offset of the symbol's position.",
+                },
             },
-            "required": ["symbol"],
+            "required": ["uri", "line", "character"],
         }
 
     async def handle(self, context: ToolContext, **kwargs: Any) -> List[Dict[str, Any]]:
         """Handles a find references request for a given symbol."""
-        symbol = kwargs["symbol"]
-        locations: List[Location] = []
-        all_uris = context.project_index.get_all_uris()
-        for file_uri in all_uris:
-            file_module = context.project_index.modules.get(file_uri)
-            if not file_module:
-                continue
+        # TODO: The implementation of this tool is incorrect. It should use the
+        # line and character from kwargs to find the specific symbol at that
+        # position, then find all references to it. The current implementation
+        # is a placeholder.
+        uri = kwargs["uri"]
+        line = kwargs["line"]
+        character = kwargs["character"]
 
-            visitor = ReferenceVisitor(symbol)
-            visitor.visit(file_module.tree)
-            for ref_node in visitor.references:
-                if hasattr(ref_node, "_range"):
-                    file_path = Path(file_uri.replace("file://", ""))
-                    file_content = context.project_index.file_cache.get_text(file_path)
-                    lines = file_content.splitlines()
-                    start_line = ref_node._range.start.line
-                    end_line = ref_node._range.end.line
-                    start_col = ref_node._range.start.column
-                    end_col = ref_node._range.end.column
-
-                    if start_line == end_line:
-                        text = lines[start_line][start_col:end_col]
-                    else:
-                        text_lines = [lines[start_line][start_col:]]
-                        text_lines.extend(lines[start_line + 1:end_line])
-                        text_lines.append(lines[end_line][:end_col])
-                        text = "\n".join(text_lines)
-
-                    locations.append(Location(uri=file_uri, range=ref_node._range, text=text))
-
-        return [loc.to_dict() for loc in locations]
+        # Placeholder implementation returns no references.
+        return []
