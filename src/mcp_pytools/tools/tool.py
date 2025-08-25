@@ -39,3 +39,7 @@ class ToolContext(Protocol):
     @property
     def project_index(self) -> Any:
         ...
+
+    @property
+    def tool_registry(self) -> Any:
+        ...
