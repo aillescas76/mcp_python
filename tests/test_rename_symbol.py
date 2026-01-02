@@ -234,7 +234,8 @@ async def test_rename_symbol_not_found(rename_project: Path):
         context, file_path=file_path, old_name=old_symbol, new_name=new_symbol, apply=False
     )
 
-    assert "error" in result
+    assert result.get("status") == "ok"
+    assert result.get("references") == []
 
 @pytest.mark.anyio
 async def test_rename_symbol_empty_names(rename_project: Path):
@@ -245,15 +246,15 @@ async def test_rename_symbol_empty_names(rename_project: Path):
     tool = RenameSymbolTool()
 
     file_path = str(root / "module1.py")
-    result = await tool.handle(
-        context, file_path=file_path, old_name="", new_name="new_name", apply=False
-    )
-    assert "error" in result
+    with pytest.raises(ValueError, match="cannot be empty"):
+        await tool.handle(
+            context, file_path=file_path, old_name="", new_name="new_name", apply=False
+        )
 
-    result = await tool.handle(
-        context, file_path=file_path, old_name="old_name", new_name="", apply=False
-    )
-    assert "error" in result
+    with pytest.raises(ValueError, match="cannot be empty"):
+        await tool.handle(
+            context, file_path=file_path, old_name="old_name", new_name="", apply=False
+        )
 
 
 @pytest.mark.anyio

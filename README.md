@@ -89,3 +89,15 @@ Once the server is running and your editor is configured, you can start using it
 - **"Clean up the imports in `src/mcp_pytools/server.py`."**
 
 The server will process these requests and, with your confirmation, perform the corresponding actions on your codebase.
+
+### Tool Examples
+
+Some tools accept structured arguments. For example, `search_text` expects lists for `includeGlobs` and `excludeGlobs`:
+
+```json
+{"pattern":"migrate_kpi_pipeline","includeGlobs":["**/*.py"]}
+```
+
+```json
+{"pattern":"TODO","excludeGlobs":["**/tests/**","**/.venv/**"]}
+```

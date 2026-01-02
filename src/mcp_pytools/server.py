@@ -58,13 +58,25 @@ class ServerContext(ToolContext):
 def create_tool_handler(tool: Tool, context: ServerContext):
     """Creates a handler function for a given tool that FastMCP can use."""
 
+    def normalize_tool_result(result: Any) -> Any:
+        if isinstance(result, list):
+            return {"items": result}
+        if result is None:
+            return {"status": "ok"}
+        if isinstance(result, (dict, str)):
+            return result
+        raise TypeError(
+            f"Tool '{tool.name}' returned unsupported result type: {type(result).__name__}"
+        )
+
     async def handler(**kwargs):
         try:
             if tool.requires_index:
                 context.ensure_index_ready()
 
             # Note: We assume the concrete tool's handle method accepts the context.
-            return await tool.handle(context, **kwargs)
+            result = await tool.handle(context, **kwargs)
+            return normalize_tool_result(result)
         except Exception as e:
             # Basic error handling, can be improved.
             return {

@@ -46,13 +46,24 @@ class MutabilityCheckTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Checks for mutable default arguments in a Python module."
+        return (
+            "Checks for mutable default arguments in a Python module. "
+            "Example: {\"uri\":\"file:///path/to/module.py\"}"
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
         return {
             "type": "object",
-            "properties": {"uri": {"type": "string"}},
+            "properties": {
+                "uri": {
+                    "type": "string",
+                    "description": (
+                        "The file URI of the Python module to check. Example: "
+                        "\"file:///path/to/module.py\""
+                    ),
+                }
+            },
             "required": ["uri"],
         }
 

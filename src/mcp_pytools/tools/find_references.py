@@ -51,7 +51,7 @@ class FindReferencesTool(Tool):
     def description(self) -> str:
         return (
             "Finds all references to a symbol by its name across the entire project. "
-            "This is a simple, text-based search."
+            "This is a simple, text-based search. Example: {\"symbol\":\"MyClass\"}"
         )
 
     @property
@@ -61,7 +61,10 @@ class FindReferencesTool(Tool):
             "properties": {
                 "symbol": {
                     "type": "string",
-                    "description": "The name of the symbol to find references for.",
+                    "description": (
+                        "The name of the symbol to find references for. "
+                        "Example: \"MyClass\""
+                    ),
                 }
             },
             "required": ["symbol"],

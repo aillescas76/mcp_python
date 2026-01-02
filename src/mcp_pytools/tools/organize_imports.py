@@ -18,7 +18,8 @@ class OrganizeImportsTool(Tool):
         return (
             "Sorts and formats import statements in a Python file according to PEP 8 "
             "standards using the 'ruff' linter. It can either return a diff of the "
-            "changes or apply them directly to the file."
+            "changes or apply them directly to the file. Example: "
+            "{\"uri\":\"file:///path/to/module.py\",\"apply\":false}"
         )
 
     @property
@@ -28,14 +29,17 @@ class OrganizeImportsTool(Tool):
             "properties": {
                 "uri": {
                     "type": "string",
-                    "description": "The file URI of the Python module to organize imports for.",
+                    "description": (
+                        "The file URI of the Python module to organize imports for. "
+                        "Example: \"file:///path/to/module.py\""
+                    ),
                 },
                 "apply": {
                     "type": "boolean",
                     "default": False,
                     "description": (
                         "If true, applies the changes directly to the file. If false, "
-                        "returns a diff of the proposed changes."
+                        "returns a diff of the proposed changes. Example: false"
                     ),
                 },
             },
@@ -47,11 +51,11 @@ class OrganizeImportsTool(Tool):
         apply = kwargs.get("apply", False)
 
         if not uri.startswith("file://"):
-            return {"error": "URI must be a file URI"}
+            raise ValueError("URI must be a file URI")
 
         path = Path(uri[7:])
         if not path.is_file():
-            return {"error": f"File not found: {path}"}
+            raise FileNotFoundError(f"File not found: {path}")
 
         original_content = context.project_index.file_cache.get_text(path)
 

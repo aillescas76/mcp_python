@@ -34,7 +34,7 @@ class SearchTextTool(Tool):
         return (
             "Performs a case-sensitive regular expression search across all text files "
             "in the project, respecting .gitignore rules. Returns a list of all "
-            "matching lines."
+            "matching lines. Example: {\"pattern\":\"foo\",\"includeGlobs\":[\"**/*.py\"]}"
         )
 
     @property
@@ -44,17 +44,26 @@ class SearchTextTool(Tool):
             "properties": {
                 "pattern": {
                     "type": "string",
-                    "description": "The Python-style regular expression to search for.",
+                    "description": (
+                        "The Python-style regular expression to search for. "
+                        "Example: \"migrate_kpi_pipeline\""
+                    ),
                 },
                 "includeGlobs": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Optional list of glob patterns to include in the search.",
+                    "description": (
+                        "Optional list of glob patterns to include in the search. "
+                        "Example: [\"**/*.py\"]"
+                    ),
                 },
                 "excludeGlobs": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "Optional list of glob patterns to exclude from the search.",
+                    "description": (
+                        "Optional list of glob patterns to exclude from the search. "
+                        "Example: [\"**/tests/**\",\"**/.venv/**\"]"
+                    ),
                 },
             },
             "required": ["pattern"],
@@ -68,8 +77,8 @@ class SearchTextTool(Tool):
         matches: List[Match] = []
         try:
             regex = re.compile(pattern)
-        except re.error:
-            return []  # Invalid regex, return no matches
+        except re.error as exc:
+            raise ValueError(f"Invalid regex pattern: {pattern}") from exc
 
         for path in walk_text_files(context.project_index.root):
             # Filtering based on includeGlobs and excludeGlobs

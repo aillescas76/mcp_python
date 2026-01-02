@@ -12,7 +12,9 @@ class IndexBuildTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Builds or rebuilds the entire project index."
+        return (
+            "Builds or rebuilds the entire project index. Example: {}"
+        )
 
     async def handle(self, context: ToolContext, **kwargs: Any) -> Dict[str, Any]:
         """Triggers a full rebuild of the project index."""

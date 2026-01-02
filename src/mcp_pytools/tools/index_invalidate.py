@@ -12,7 +12,10 @@ class IndexInvalidateTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Invalidates and rebuilds a file in the project index."
+        return (
+            "Invalidates and rebuilds a file in the project index. "
+            "Example: {\"uri\":\"file:///path/to/module.py\"}"
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -21,7 +24,10 @@ class IndexInvalidateTool(Tool):
             "properties": {
                 "uri": {
                     "type": "string",
-                    "description": "The URI of the file to invalidate and rebuild.",
+                    "description": (
+                        "The file URI of the file to invalidate and rebuild. Example: "
+                        "\"file:///path/to/module.py\""
+                    ),
                 }
             },
             "required": ["uri"],

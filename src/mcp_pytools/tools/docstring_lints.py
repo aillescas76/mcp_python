@@ -74,7 +74,8 @@ class DocstringLintsTool(Tool):
         return (
             "Lints a Python file to find missing docstrings in modules, classes, and "
             "functions, reporting them as diagnostics. This helps enforce "
-            "documentation standards."
+            "documentation standards. Example: "
+            "{\"uri\":\"file:///path/to/module.py\",\"ignore_private\":true}"
         )
 
     @property
@@ -84,14 +85,17 @@ class DocstringLintsTool(Tool):
             "properties": {
                 "uri": {
                     "type": "string",
-                    "description": "The file URI of the Python module to check.",
+                    "description": (
+                        "The file URI of the Python module to check. Example: "
+                        "\"file:///path/to/module.py\""
+                    ),
                 },
                 "ignore_private": {
                     "type": "boolean",
                     "default": False,
                     "description": (
                         "If true, functions and classes starting with an underscore "
-                        "will be ignored."
+                        "will be ignored. Example: true"
                     ),
                 },
             },

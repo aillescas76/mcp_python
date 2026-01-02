@@ -18,7 +18,7 @@ class DocumentSymbolsTool(Tool):
         return (
             "Lists all symbols (classes, functions, methods, etc.) in a given Python "
             "file. This is useful for getting a high-level overview of a file's "
-            "structure and contents."
+            "structure and contents. Example: {\"uri\":\"file:///path/to/module.py\"}"
         )
 
     @property
@@ -28,7 +28,10 @@ class DocumentSymbolsTool(Tool):
             "properties": {
                 "uri": {
                     "type": "string",
-                    "description": "The file URI of the Python module to analyze.",
+                    "description": (
+                        "The file URI of the Python module to analyze. Example: "
+                        "\"file:///path/to/module.py\""
+                    ),
                 }
             },
             "required": ["uri"],

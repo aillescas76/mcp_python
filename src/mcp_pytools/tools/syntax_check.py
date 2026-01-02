@@ -15,7 +15,8 @@ class SyntaxCheckTool(Tool):
         return (
             "Analyzes a single Python file for syntax errors and reports them as "
             "diagnostics. This tool is useful for quickly validating the basic "
-            "structure of a file without performing a full analysis."
+            "structure of a file without performing a full analysis. Example: "
+            "{\"uri\":\"file:///path/to/module.py\"}"
         )
 
     @property
@@ -25,7 +26,10 @@ class SyntaxCheckTool(Tool):
             "properties": {
                 "uri": {
                     "type": "string",
-                    "description": "The file URI of the Python module to check.",
+                    "description": (
+                        "The file URI of the Python module to check. Example: "
+                        "\"file:///path/to/module.py\""
+                    ),
                 }
             },
             "required": ["uri"],

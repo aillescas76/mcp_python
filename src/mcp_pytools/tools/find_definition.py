@@ -29,7 +29,7 @@ class FindDefinitionTool(Tool):
         return (
             "Finds the definition of a symbol by its name, searching across the "
             "entire project. This is a custom implementation that performs a "
-            "project-wide search."
+            "project-wide search. Example: {\"symbol\":\"MyClass\"}"
         )
 
     @property
@@ -39,7 +39,10 @@ class FindDefinitionTool(Tool):
             "properties": {
                 "symbol": {
                     "type": "string",
-                    "description": "The name of the symbol to find the definition for.",
+                    "description": (
+                        "The name of the symbol to find the definition for. "
+                        "Example: \"MyClass\""
+                    ),
                 }
             },
             "required": ["symbol"],

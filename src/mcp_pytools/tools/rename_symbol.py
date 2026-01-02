@@ -12,7 +12,11 @@ class RenameSymbolTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Renames a symbol and all its references across the project."
+        return (
+            "Renames a symbol and all its references across the project. "
+            "Set apply=false to preview references, apply=true to edit files. "
+            "Example: {\"old_name\":\"Foo\",\"new_name\":\"Bar\",\"apply\":false}"
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -21,18 +25,19 @@ class RenameSymbolTool(Tool):
             "properties": {
                 "old_name": {
                     "type": "string",
-                    "description": "The symbol name to be replaced.",
+                    "description": "The symbol name to be replaced. Example: \"Foo\"",
                 },
                 "new_name": {
                     "type": "string",
-                    "description": "The new name for the symbol.",
+                    "description": "The new name for the symbol. Example: \"Bar\"",
                 },
                 "apply": {
                     "type": "boolean",
                     "default": False,
                     "description": (
                         "If true, applies the changes directly to the files. If false, "
-                        "returns a list of references that would be changed."
+                        "returns a list of references that would be changed. "
+                        "Example: false"
                     ),
                 },
             },
@@ -45,16 +50,15 @@ class RenameSymbolTool(Tool):
         apply = kwargs.get("apply", False)
 
         if not old_name or not new_name:
-            return {"error": "Old symbol name and new name cannot be empty."}
+            raise ValueError("Old symbol name and new name cannot be empty.")
 
         find_references_tool = context.tool_registry.get_tool("find_references")
         references = await find_references_tool.handle(context, symbol=old_name)
 
-        if not references:
-            return {"error": f"No references found for symbol: {old_name}"}
-
         if not apply:
             return {"status": "ok", "references": references}
+        if not references:
+            return {"status": "ok", "modified_files": []}
 
         modified_files = set()
         grouped_references = defaultdict(list)

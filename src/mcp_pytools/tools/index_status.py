@@ -12,7 +12,7 @@ class IndexStatusTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Gets the status of the project index."
+        return "Gets the status of the project index. Example: {}"
 
     @property
     def requires_index(self) -> bool:

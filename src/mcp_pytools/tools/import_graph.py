@@ -40,7 +40,10 @@ class ImportGraphTool(Tool):
 
     @property
     def description(self) -> str:
-        return "Shows a module's direct imports and its dependents (reverse imports)."
+        return (
+            "Shows a module's direct imports and its dependents (reverse imports). "
+            "Example: {\"moduleUri\":\"file:///path/to/module.py\"}"
+        )
 
     @property
     def schema(self) -> Dict[str, Any]:
@@ -49,7 +52,10 @@ class ImportGraphTool(Tool):
             "properties": {
                 "moduleUri": {
                     "type": "string",
-                    "description": "The URI of the module to query.",
+                    "description": (
+                        "The file URI of the module to query. Example: "
+                        "\"file:///path/to/module.py\""
+                    ),
                 }
             },
             "required": ["moduleUri"],
